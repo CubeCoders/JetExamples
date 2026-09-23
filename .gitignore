@@ -1,0 +1,8 @@
+**/build*/
+**/sdkconfig
+**/sdkconfig.old
+**/sdkconfig.s3*
+**/sdkconfig.p4*
+**/build-*.log
+**/dependencies.lock
+**/managed_components/
