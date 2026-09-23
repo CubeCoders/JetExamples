@@ -4,7 +4,7 @@ Built with ESP-IDF 6.0.1 and flashed to the ESP32-S3 on COM6 on 2026-09-23.
 Jet remains at fffbf63. No engine or shared-runtime changes were needed.
 P4 defaults are provided but were not hardware tested.
 
-## Native checks
+## Initial oak native checks
 
 Release CTest passed with assertions enabled. Six images match between serial
 and parallel rendering, with both field parities and framebuffer guard pixels.
@@ -77,4 +77,45 @@ were observed. Stage means below omit the first window after every switch.
 
 Startup free memory: 61,151 bytes internal and 8,086,740 bytes PSRAM.
 Firmware size: 0x75fa0 bytes.
-The corrected version is running on S3 for confirmation of visual stability.
+The user confirmed that depth testing removed the wobbling, but rejected the
+performance cost. The pine revision below replaces the intersecting canopy.
+
+## Pine replacement: painter rendering restored
+
+Replaced the overlapping oak clusters with a single connected pine surface.
+Its branch tiers share rings rather than intersecting. The generator verifies
+that each welded edge has two incident faces. Full/simple meshes have 224/84
+source triangles, followed by the matching two-triangle billboard.
+
+Enabled backface culling and per-triangle sorting; disabled the depth buffer
+and restored FAST_Z=1. The scene no longer allocates 150 KiB of depth storage.
+No engine or shared-runtime changes were required.
+
+Native CTest passed. All six serial/parallel image comparisons and colour
+buffer guards pass. Reversing the source triangle order across 64 half-second
+poses over both camera passes changes at most 10 physical pixels (5 half-width
+samples) at equal-depth boundaries; the allowance is 16 physical pixels.
+This is much smaller than the original overlapping canopy's ordering changes.
+
+Native accepted counts are 104 at the near full-mesh pose, 61 at the simple
+mesh, 65 during transition and 33 at maximum distance. The far reference is
+84. Exact distance probes give 92, 66, 61 and 37 triangles at 1799, 1801,
+2500 and 2601 units. Source counts and accepted counts differ because of
+backface culling, projection degeneracy and the rest of the scenery.
+The final montage was inspected for shape, orientation and transitions.
+
+Rebuilt and flashed on S3. A 38-second capture covers both camera passes.
+Across 36 windows, cadence averaged 59.74 fields/s
+(range 59.70-59.82). No panics or idle recovery
+were observed. Stage means omit the first reporting window after each switch.
+
+| Representation | Mean fields/s | Mean render ms |
+| --- | --- | --- |
+| FULL MESH | 59.74 | 7.18 |
+| SIMPLE MESH | 59.73 | 4.71 |
+| BILLBOARD | 59.79 | 4.50 |
+| REFERENCE FULL MESH | 59.73 | 6.17 |
+
+Startup free memory: 61,435 bytes internal and 8,334,852 bytes PSRAM.
+Firmware size: 0x75f20 bytes.
+The revised pine demo is running on S3 for physical-display feedback.

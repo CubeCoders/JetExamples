@@ -19,7 +19,7 @@ inline bool reference=false;
 inline int distance=0;
 inline Object *tree=nullptr,*simple=nullptr,*impostor=nullptr;
 inline uint16_t sky[Display::RENDER_HEIGHT];
-inline Texture treeTexture(128,160,const_cast<uint16_t*>(Assets::oak),true,0);
+inline Texture treeTexture(128,160,const_cast<uint16_t*>(Assets::pine),true,0);
 inline Material treeMaterial(0xffff,&treeTexture);
 inline uint16_t rgb(unsigned c){return uint16_t(((c>>19)&31)<<11|((c>>10)&63)<<5|((c>>3)&31));}
 inline Material* paint(unsigned c){auto* m=new Material(rgb(c));m->shadingMode=ShadingMode::UNLIT;return m;}
@@ -28,7 +28,7 @@ inline void quad(Object* o,Vector3 a,Vector3 b,Vector3 c,Vector3 d,Material* m){
 template<size_t N> Object* mesh(const TreeData::Face (&data)[N]) {
  auto* o=new Object;std::map<uint16_t,Material*> colours;
  for(const auto& f:data){auto*& m=colours[f.colour];if(!m){m=new Material(f.colour);m->shadingMode=ShadingMode::UNLIT;}int n=int(o->vertices.size());for(int v=0;v<3;++v)o->addVertex({{f.p[v*3],f.p[v*3+1],f.p[v*3+2]}});o->addTriangle(n,n+1,n+2,m);}
- o->cullingMode=CullingMode::NO_CULLING;finish(o);return o;
+ o->cullingMode=CullingMode::CULL_BACKFACES;finish(o);return o;
 }
 inline void update(float dt){
  time=std::fmod(time+dt,32.f);reference=time>=16;const float phase=std::fmod(time,16.f),a=phase*2*pi/16;

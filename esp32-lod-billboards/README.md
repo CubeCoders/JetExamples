@@ -1,15 +1,15 @@
 # Woodland / LOD
 
-A tree in a daylight meadow changes from a full mesh to a simpler mesh and
+A tiered pine in a daylight meadow changes from a full mesh to a simpler mesh and
 finally a camera-facing image as the camera retreats. A path, fence and distant
 tree line give the scene scale. The featured tree always occupies the same
 world position; the billboard is real world-space geometry, not a Sprite2D.
 
 | Distance from the tree centre | Representation | Source triangles |
 | --- | --- | --- |
-| Below 1800 | Full mesh | 624 |
-| 1800-2400 | Simplified mesh | 176 |
-| 2400-2600 | Mesh fades out while billboard fades in | 178 |
+| Below 1800 | Full mesh | 224 |
+| 1800-2400 | Simplified mesh | 84 |
+| 2400-2600 | Mesh fades out while billboard fades in | 86 |
 | 2600 and beyond | Camera-facing billboard | 2 |
 
 The 32-second loop has two matched 16-second camera passes. The first uses
@@ -39,12 +39,12 @@ triangle work. The reference pass disables the mesh LOD/fade and the impostor.
 
 The billboard follows camera yaw while remaining upright; it preserves world
 position and perspective size. The background trees all share the same image.
-The intersecting canopy clusters use per-pixel depth testing (`Z_BUFFERING=1`,
-`FAST_Z=0`). Average triangle-depth sorting cannot resolve their intersecting
-surfaces and produced visibly unstable foliage on S3. Opaque triangles are
-ordered front to back to reduce overdraw. Face colours are baked, so there is
-no per-frame lighting pass. The shared runtime allocates a 150 KiB depth buffer
-in PSRAM; the billboard path also retains depth testing for consistent occlusion.
+The pine is a single connected surface with tiered branches, rather than
+intersecting canopy volumes. Backface culling and per-triangle sorting allow
+painter rendering (`Z_BUFFERING=0`, `FAST_Z=1`, `SORT_TRIANGLES=1`). There is no
+depth buffer. Face colours are baked, so there is no per-frame lighting pass.
+The asset generator verifies that every welded edge belongs to two faces.
+
 
 ## Image and transition tradeoffs
 
@@ -85,8 +85,8 @@ ctest --test-dir build-preview -C Release --output-on-failure
 ```
 
 Native checks verify actual rasterized triangle reductions at both LOD
-boundaries, billboard configuration, the reference path, colour/depth buffer
-guards, opaque visibility under reversed triangle order and
+boundaries, billboard configuration, the reference path, colour buffer guards,
+visibility under reversed triangle order across the camera sweep and
 six serial/parallel image comparisons covering both field parities.
 `woodland.ppm` shows four LOD views and two reference views; preview performance
 counters are placeholders.
