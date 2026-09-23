@@ -49,8 +49,15 @@ The example places larger static mesh allocations in PSRAM during startup,
 then restores the normal allocation threshold, leaving internal memory for hot
 transform scratch. Immutable texture data stays in flash.
 
-Measured S3 cadence is approximately 43-52 fields/s, up from 25-28 before these
-optimisations. See [the validation record](VALIDATION.md) for conditions and limits.
+Jet also detects exactly matching triangle normals in Phong/Gouraud and evaluates
+their lighting once per triangle. Phong keeps its additive specular highlight;
+Gouraud also requires matching cached vertex brightness. This model's 400 body
+and wheel triangles have constant normals, so all are eligible without changing
+materials. Smooth triangles keep their interpolating path. Fixed-point colour
+rounding can differ slightly from the original per-pixel normal interpolation.
+
+Measured S3 cadence is approximately 51-58 fields/s after startup, up from 45-52
+before the constant-normal shortcut and 25-28 before the earlier optimisations. See [the validation record](VALIDATION.md) for conditions and limits.
 
 ## Build and preview
 
