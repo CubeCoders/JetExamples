@@ -44,6 +44,8 @@ or deployed rear engine. Road sections recycle around the tracking camera.
   Persistent immutable textures remain valid for concurrent scanout snapshots.
   Large scene allocations prefer PSRAM; internal RAM is reserved for live
   transforms and runtime work. Adjacent shop details share transform work.
+- Enclosed cockpit with sloping windscreen pillars, roof header, door trim,
+  centre console and an unattended yoke; the driver camera stays at road height.
 - Only the rounded FPS number appears at the absolute top-right on hardware.
   Full timing and triangle information remains in serial diagnostics.
 

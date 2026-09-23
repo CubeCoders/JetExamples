@@ -43,6 +43,10 @@ front tracking to 55, boulevard to 52 and pursuit to 48. The rain street (35),
 cockpit (40) and hover conversion (42) still need work. All eleven cuts and the
 intended restart completed on S3 with that revision. The subsequent review
 video also moves three camera rigs clear of traffic and corrects police spacing.
+The enclosed-cabin revision adds the roof, windscreen frame, door cards, console
+and unattended yoke. Its native tests and all 2,021 optimized/reference timeline
+hashes pass; both the cockpit excerpt and full MP4 decode without errors.
+The hardware figures above predate this cabin geometry.
 
 Painter sorting remains an authored-scene compromise: arbitrary new intersecting
 geometry may need subdivision, ordering changes or depth testing. Environment

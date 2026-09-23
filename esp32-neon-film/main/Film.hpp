@@ -44,6 +44,33 @@ inline void cockpit(){
  for(int i=0;i<12;++i)box(-210+i*39,95,-130,25,12,16,bank.paint(i%3==0?0xF5B73C:i%3==1?0x45D8C2:0xF85589));
  // The cabin shares the exterior's scale: 260 wide, 160 to the roof.
  for(size_t i=first;i<bank.objects.size();++i){auto* o=bank.objects[i].get();o->bakeScale(1,2);o->position=o->position.divide(2)+Vector3{0,-20,120};o->cachePositions();dashboardParts.push_back(o);}
+ // Enclose the eye position with a real interior shell. The sloping
+ // pillars and roof header frame the road; instruments sit inside this cabin.
+ auto* roof=bank.paint(0x101928);auto* trim=bank.paint(0x344357);auto* bevel=bank.paint(0x586985);auto* cyan=bank.paint(0x399CBA);
+ panel({-170,175,-230},{170,175,-230},{145,175,-20},{-145,175,-20},roof);
+ panel({-145,175,-20},{145,175,-20},{102,157,-15},{-102,157,-15},trim);
+ panel({-102,157,-15},{102,157,-15},{102,160,-16},{-102,160,-16},cyan);
+ for(int side:{-1,1}){
+  panel({side*88,162,-20},{side*108,169,-20},{side*150,78,115},{side*128,88,115},trim);
+  panel({side*86,161,-19},{side*89,162,-19},{side*129,89,114},{side*126,88,114},cyan);
+  // Door top, inner door card, armrest and a lit control recess.
+  panel({side*155,82,-220},{side*155,82,115},{side*128,92,115},{side*128,92,-220},bevel);
+  panel({side*155,0,-220},{side*155,0,120},{side*128,88,120},{side*128,88,-220},roof);
+  panel({side*150,72,-125},{side*121,76,-125},{side*121,76,40},{side*150,72,40},trim);
+  panel({side*129,93,-135},{side*129,93,110},{side*129,95,110},{side*129,95,-135},cyan);
+ }
+ // Faceted console flows from the dashboard towards the seats. It is empty:
+ // autonomy is indicated by the scanner and the physical display, not a driver.
+ panel({-30,48,-160},{30,48,-160},{43,90,65},{-43,90,65},roof);
+ panel({-30,48,-160},{-43,90,65},{-48,85,65},{-37,43,-160},trim);
+ panel({30,48,-160},{43,90,65},{48,85,65},{37,43,-160},trim);
+ auto* amber=bank.paint(0xE7A54D);
+ for(int i=0;i<5;++i){int z=10+i*14,y=76+i*4;panel({-21,y,z},{21,y,z},{21,y+2,z+9},{-21,y+2,z+9},i%2?cyan:amber);}
+ // Small squared-off yoke, deliberately unattended, in front of the left seat.
+ auto* yoke=bank.paint(0x4D607A);
+ panel({-73,85,-35},{-17,85,-35},{-17,95,-27},{-73,95,-27},yoke);
+ panel({-74,85,-35},{-65,90,-32},{-66,120,-23},{-79,120,-23},yoke);
+ panel({-25,90,-32},{-16,85,-35},{-11,120,-23},{-24,120,-23},yoke);
  auto* bonnet=bank.paint(0x647DAA);
  panel({-97,111,121},{97,111,121},{108,73,285},{-108,73,285},bonnet);
 }
@@ -102,7 +129,7 @@ inline void pose(float p){
  if(shot==2){road.advance(t*1900);car={0,0,0};camera.setPosition(lerp({185,800,-700},{215,700,-400},p));camera.lookAt({0,80,70});hero.pose(car,0);weather(t,true,car);}
  if(shot==3){road.advance(t*1900);car={0,0,0};float a=(-65+130*p)*pi/180;camera.setPosition({int(240*std::sin(a)),190,int(780*std::cos(a))});camera.lookAt({0,90,40});hero.pose(car,0);weather(t,true,car);}
  if(shot==4||shot==5){if(shot==4)road.advance(t*1900);
-  if(shot==4){camera.setPosition(lerp({-35,136,-125},{-35,136,-110},p));camera.lookAt({-35,128,1300});speed(70);}
+  if(shot==4){camera.setPosition(lerp({0,136,-160},{0,136,-145},p));camera.lookAt({0,128,1300});speed(70);}
   else{camera.setPosition(lerp({-61,75,-30},{-61,75,9},p));camera.lookAt({-61,75,86});speed(70+int(18*clamp(t/5.f)+.5f));}
   for(size_t i=0;i<scanner.size();++i){float cursor=std::fmod(t*9,26.f);if(cursor>13)cursor=26-cursor;scanner[i]->color=rgb(std::abs(float(i)-cursor)<1.6f?0xFF403C:0x4A1727);}
  }
