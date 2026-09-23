@@ -78,3 +78,32 @@ at startup (before any subsequent lazy allocations). No depth buffer is allocate
 
 Firmware size is 0x75d70 bytes; 54% of the 1 MiB application partition remains
 free. P4 has not been built or hardware-tested for this example.
+
+
+## Texture filtering measurement
+
+A temporary S3 build compared the current 256x256 indexed livery with an exact
+palette expansion to RGB565, then enabled bilinear filtering on that RGB565
+texture. All three modes repeated the same 20-second camera path in one binary.
+Window environment filtering remained enabled throughout. Both texture formats
+were read from flash; no texture copy to DRAM was introduced.
+
+The first two serial reporting windows after each transition were discarded.
+These are arithmetic means of the remaining moving-scene windows (16, 16 and
+14 respectively), not a fixed-pose or sampler-only benchmark:
+
+| Livery | Mean field FPS | Mean render time |
+| --- | ---: | ---: |
+| Indexed nearest (current) | 56.06 | 17.57 ms |
+| RGB565 nearest | 53.89 | 18.28 ms |
+| RGB565 bilinear | 50.17 | 19.67 ms |
+
+Filtering adds about 7.6% render time and reduces cadence by 6.9% versus RGB565
+nearest. Including the format change needed by the current filtering path,
+render time increases 11.9% and cadence drops 10.5% versus the indexed livery.
+Bilinear cadence ranges 46.57-52.85 fields/s across the measured views.
+
+The RGB565 livery occupies 128 KiB instead of 64 KiB of indices plus a 512-byte
+palette. The temporary benchmark held both formats; a permanent conversion would
+only need the RGB565 one. The original indexed demo source and firmware were
+restored after measurement; no benchmark mode was added to the published example.
