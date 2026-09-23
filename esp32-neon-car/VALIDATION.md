@@ -202,3 +202,5 @@ average **59.77 fields/s** and **15.65 ms** render time, with cadence ranging
 resets were observed. Firmware size is 0x75c20 bytes; startup memory remains
 74,031 bytes internal and 8,255,844 bytes PSRAM free. The brighter version is
 running on S3 for display-level visual feedback.
+
+The brighter car version was subsequently visually approved on S3 before starting Texture Lab.
