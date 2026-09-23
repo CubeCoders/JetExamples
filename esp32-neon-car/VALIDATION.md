@@ -173,3 +173,15 @@ averaged 56.69 fields/s and 17.36 ms render time in a separate orbit capture.
 Scanout remains 16.33-16.35 ms. No recovery yields or unexpected resets were seen.
 Startup internal/PSRAM free memory is 74,031 / 8,255,844 bytes. Firmware size is
 0x75c10 bytes. The coarser grid and rectangular shadow remain on S3 for review.
+
+
+## Inset shadow adjustment
+
+The rectangle is reduced to 360 by 930 units, centred beneath the car's roughly
+398-by-1019 footprint. This leaves about 19 units per side and 44 units at each
+end. Height, colour and two-triangle topology remain unchanged.
+
+Five native checks pass and four orbit views were inspected. The S3 build was
+flashed and a short startup/render capture checked. The earlier full-orbit timing
+above belongs to the larger rectangle; no new full-orbit benchmark was needed
+for this size adjustment.

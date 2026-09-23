@@ -27,7 +27,7 @@ four triangles for its separately authored front and rear windows.
   it is not a general solution for arbitrary intersecting models.
 
 The floor grid uses 440-unit cells (18 narrow quads, 36 triangles). The shadow
-is one two-triangle rectangle covering the same outer bounds as the former oval.
+is one two-triangle, 360-by-930 rectangle inset from the car's footprint.
 Both remain untextured, unlit geometry.
 
 The original export shares the body material with its first wheel. Asset

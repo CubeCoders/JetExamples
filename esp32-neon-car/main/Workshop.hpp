@@ -71,9 +71,9 @@ inline void makeRoom() {
   quad(lines,pos(a,685,19),pos(a,694,19),pos(b,694,19),pos(b,685,19),i%8<4?cyan:pink);
  }
  put(lines,true);lines=new Object;lines->cullingMode=CullingMode::NO_CULLING;
- // One rectangular contact-shadow quad beneath the stationary car.
+ // Inset from the car's roughly 398-by-1019 footprint on the platform.
  auto* shadow=paint(0x0D1524);
- quad(lines,{-235,20,-550},{235,20,-550},{235,20,550},{-235,20,550},shadow);
+ quad(lines,{-180,20,-465},{180,20,-465},{180,20,465},{-180,20,465},shadow);
  put(lines,true);
  // Wall-mounted workshop ribs stay outside the camera orbit, so the car
  // remains unobstructed while different light banks pass behind it.
