@@ -1,6 +1,7 @@
 #include "Runtime.hpp"
 #include "Display.hpp"
 #include "FramePacer.hpp"
+#include "PerformanceOverlay.hpp"
 #include <esp_heap_caps.h>
 #include <cstdio>
 #include <algorithm>
@@ -26,7 +27,13 @@ TaskHandle_t renderTask = nullptr;
 SemaphoreHandle_t renderDone = nullptr;
 uint16_t* renderBuffer = nullptr;
 float elapsed = 1.0f / 60.0f;
-int64_t renderUs = 0;
+int64_t renderUs = 0, rasterUs = 0;
+void measuredRaster(Renderer::Scene& target) {
+    const int64_t start = esp_timer_get_time();
+    if (executor) executor(target);
+    else target.rasterizeBand(0, Display::RENDER_HEIGHT);
+    rasterUs = esp_timer_get_time() - start;
+}
 
 // Copy mutable sprite and material state before waking the render task.
 // Textures/pixel data are borrowed and must not be modified during scanout.
@@ -60,7 +67,7 @@ void render(void*) {
         if (updateScene) updateScene(elapsed);
         const int64_t start = esp_timer_get_time();
         scene->setFramebuffer(renderBuffer);
-        scene->render(executor);
+        scene->render(measuredRaster);
         renderUs = esp_timer_get_time() - start;
         xSemaphoreGive(renderDone);
     }
@@ -78,6 +85,8 @@ void run(void*) {
     scene->getRenderer()->interlacedMode = true;
     initScene(*scene);
     configASSERT(scene->getCamera());
+    static PerformanceOverlay stats;
+    stats.attach(*scene, Display::RENDER_WIDTH);
     renderDone = xSemaphoreCreateBinary();
     configASSERT(renderDone);
 #if CONFIG_IDF_TARGET_ESP32S3
@@ -93,7 +102,7 @@ void run(void*) {
     FramePacer pacer;
     pacer.init();
     Overlays overlays;
-    int64_t previousStart = 0, intervalSum = 0, renderSum = 0, scanoutSum = 0;
+    int64_t previousStart = 0, intervalSum = 0, renderSum = 0, scanoutSum = 0, rasterSum = 0;
     unsigned intervals = 0, samples = 0;
     for (;;) {
         const int64_t start = esp_timer_get_time();
@@ -103,6 +112,7 @@ void run(void*) {
             ++intervals;
         }
         previousStart = start;
+        stats.tick(start, unsigned(scene->lastFrameRasterizedTriangles));
         const auto frame = Display::beginFrame();
         renderBuffer = frame.renderBuffer;
         // Previous-field reads are immutable even while both cores rasterize.
@@ -116,11 +126,12 @@ void run(void*) {
         scanoutSum += esp_timer_get_time() - scanoutStart;
         xSemaphoreTake(renderDone, portMAX_DELAY);
         renderSum += renderUs;
-        if (++samples == 300) {
-            std::printf("Cadence %.2f fields/s; render %.2f ms, scanout %.2f ms; idle recovery %u\n",
+        rasterSum += rasterUs;
+        if (++samples == 60) {
+            std::printf("Cadence %.2f fields/s; render %.2f ms (setup %.2f, raster %.2f), scanout %.2f ms; %u tris, %u tris/s; idle recovery %u\n",
                 intervals * 1000000.0 / intervalSum,
-                renderSum / 300000.0, scanoutSum / 300000.0, pacer.idleRecoveryYields);
-            intervalSum = renderSum = scanoutSum = 0;
+                renderSum / 60000.0, (renderSum-rasterSum) / 60000.0, rasterSum / 60000.0, scanoutSum / 60000.0, stats.triangles(), stats.trianglesPerSecond(), pacer.idleRecoveryYields);
+            intervalSum = renderSum = scanoutSum = rasterSum = 0;
             intervals = samples = 0;
         }
         pacer.waitNext();

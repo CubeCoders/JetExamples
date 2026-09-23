@@ -15,7 +15,8 @@ tests/                   host checks
 ```
 
 Start with [esp32-template-cube](esp32-template-cube/README.md). Its only visible
-content is a rotating, six-colour 3D cube on a dark background.
+scene is a rotating, six-colour 3D cube on a dark background, with a shared
+performance overlay.
 
 After cloning this repository, run `git submodule update --init --recursive`.
 Keep the repository layout intact: each example references `../components`.
@@ -36,8 +37,23 @@ The runtime preserves the game firmware's fast paths:
   portable RGB565 scanline compositing, including full-resolution overlays.
 
 This is 60 **fields** per second: each physical LCD row updates at 30 Hz.
+All examples display FPS, TRIS and TRI/S in a full-resolution overlay:
+- FPS is completed render fields per second, sampled over at least 0.5 seconds.
+- TRIS is the most recently completed field's unique rasterized triangle count
+  after culling and clipping. It counts triangles accepted for rasterization,
+  including fully depth-occluded triangles; it is not a visible-pixel query.
+- TRI/S sums those actual per-field counts over the same elapsed-time window,
+  rather than multiplying FPS by the model's total polygon count. Triangles
+  spanning both raster workers count once.
+
 Serial timing reports describe cadence, rendering and scanout separately.
 The cube is deliberately small; it is not a renderer throughput benchmark.
+
+## Showcases
+
+See [the S3 showcase series](SHOWCASES.md) for coverage and review progress.
+The first example is [Utah teapot lighting](esp32-lighting-teapot/README.md).
+Each showcase is reviewed on hardware before the next is started.
 
 ## Host checks
 

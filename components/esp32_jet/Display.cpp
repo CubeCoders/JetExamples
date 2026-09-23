@@ -118,7 +118,12 @@ bool allocateBuffers() {
 #if Z_BUFFERING
     // Stride matches the renderer's depth-buffer layout: half-width when
     // HALF_WIDTH_BUFFERS is enabled, per-pixel otherwise.
-    depthBuffer = (uint16_t*)heap_caps_aligned_alloc(sizeof(uint32_t), ZBUFFER_STRIDE(SCREEN_WIDTH) * SCREEN_HEIGHT * sizeof(uint16_t), MALLOC_CAP_8BIT | MALLOC_CAP_DMA);
+    // Depth is CPU-only, never a DMA source. Keep scarce internal SRAM for
+    // the field buffers, row queue and tasks; use PSRAM when it is present.
+    const size_t depthBytes = ZBUFFER_STRIDE(SCREEN_WIDTH) * SCREEN_HEIGHT * sizeof(uint16_t);
+    depthBuffer = (uint16_t*)heap_caps_aligned_alloc(16, depthBytes, MALLOC_CAP_8BIT | MALLOC_CAP_SPIRAM);
+    if (!depthBuffer)
+        depthBuffer = (uint16_t*)heap_caps_aligned_alloc(16, depthBytes, MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL);
     if (!depthBuffer) return false;
 #endif
     return true;

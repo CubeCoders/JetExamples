@@ -20,9 +20,9 @@ inline int64_t lowerTime = 0;
 inline void execute(Renderer::Scene& scene) {
     // Current-frame water reflections may read another band's pixels.
     // Frame setup/material updates are serial; only these row-disjoint
-    // raster passes overlap. FreeRTOS saves S3 cop_ai (CP3) SIMD state when
+    // raster passes overlap, including their full-height depth rows. FreeRTOS saves S3 cop_ai (CP3) SIMD state when
     // the display producer preempts this worker.
-    if (Z_BUFFERING || !task || !scene.getRenderer()->reflectBuffer || !scene.lastFrameDrawnTriangles) {
+    if (!task || !scene.getRenderer()->reflectBuffer || !scene.lastFrameDrawnTriangles) {
         scene.rasterizeBand(0, height);
         return;
     }

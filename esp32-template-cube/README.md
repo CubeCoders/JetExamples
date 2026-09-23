@@ -60,3 +60,8 @@ Do not modify the scene from other tasks without synchronization.
 The renderer and LCD initializer run on core 0; rendering runs on core 1.
 Allocation or task creation failures stop initialization rather than starting
 a frame loop with invalid buffers. Serial statistics are printed every 300 fields.
+
+
+All examples include the shared FPS/TRIS/TRI/S overlay. FPS measures completed
+render fields; TRI/S sums the culled/rasterized counts over the same sampling
+window. See the repository README for exact counter definitions.
