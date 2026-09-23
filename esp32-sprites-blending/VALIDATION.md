@@ -51,8 +51,7 @@ in flash, with separate immutable label data. Firmware is **0x7bc20 bytes**,
 leaving 52% of the 1 MiB app partition free. The board's existing 16 MiB physical
 versus 8 MiB configured flash warning is unchanged.
 
-The example is running on S3 for physical-display feedback; visual approval is
-pending. P4 defaults are provided but were not tested on hardware.
+The initial scene and subsequent closer camera were approved on the S3. P4 defaults are provided but were not tested on hardware.
 
 ## Closer camera revision
 
@@ -68,4 +67,4 @@ windows averaged 58.90 fields/s, ranging 57.90-59.42,
 with render time 10.02-11.45 ms. The larger on-screen scene slightly
 increases fill/scanout cost relative to the previous camera. No panics, unexpected
 resets or idle recovery were observed. Firmware size is 0x7bc30 bytes.
-Physical-display feedback on the new camera is pending.
+The user approved the closer camera and scene on the S3.

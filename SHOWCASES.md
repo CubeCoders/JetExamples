@@ -16,8 +16,9 @@ The cube remains the minimal reusable template.
 | 05 | `esp32-postfx-crt` | Seven-second CRT off/on comparison, bright arcade test card, matched rotating cube, physical-row scanlines without an extra buffer | Approved on S3 |
 | 06 | `esp32-postfx-cel` | Seven-second smooth/cel comparison on the glossy red teapot, four diffuse bands, no extra effect buffer | Approved on S3 |
 | 07 | `esp32-particles` | Four stages: additive sparks, water spray, 200-slot cap, distance culling; LIVE/DRAWN counters and inclusive render timing | Approved on S3 |
-| 08 | `esp32-sprites-blending` | After Hours: mirrored-mesh glossy floor, translucent layering, additive lamp pools/cones, projected quarter-image sprite halos | On S3; visual review pending |
-| 08b | `esp32-sprite-controls` | Remaining sprite flips, combined alpha, animated fades, letterboxing and other 3D blend equations | Planned |
+| 08 | `esp32-sprites-blending` | After Hours: mirrored-mesh glossy floor, translucent layering, additive lamp pools/cones, projected quarter-image sprite halos | Approved on S3 |
+| 08b | `esp32-sprite-controls` | Air Mail: aircraft flips, shared/per-sprite alpha echoes, animated letterboxing and full-screen fades | On S3; visual review pending |
+| 08c | `esp32-object-blending` | Remaining 3D object blend equations: subtract, scale, average and XOR | Planned |
 | 09 | `esp32-geometry-depth` | Primitives, billboards, near/far clipping, culling, depth bias, optional Z buffering, picking and distance/LOD fades | Planned |
 
 Every completed project will document its configuration, assets, measured S3
