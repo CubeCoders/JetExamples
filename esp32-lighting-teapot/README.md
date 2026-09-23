@@ -17,7 +17,7 @@ The authentic Utah teapot has 822 vertices and 1,560 triangles, generated from
 Bezier patches with analytic smooth normals. See [asset provenance](assets/README.md).
 The brisk tilt and roll reduce pauses caused by integer-degree object angles.
 
-`LIGHTING=1`, `Z_BUFFERING=1` and `FAST_Z=0` give accurate per-pixel depth for
+`LIGHTING=1`, `Z_BUFFERING=1` and `FAST_Z=0` give interpolated per-pixel depth for
 the intersecting handle, spout and body. Per-object triangle sorting is disabled;
 the global queue opts into `JET_DEPTH_SORT_OPAQUE_FRONT_TO_BACK=1` to reject
 hidden pixels before lighting. That option keeps blended geometry in a later
@@ -48,7 +48,7 @@ cmake --build build-preview --config Release
 ctest --test-dir build-preview -C Release --output-on-failure
 ```
 
-Six checks cover four glossy preview poses (`teapot.ppm`), normal lengths,
+Eight checks cover four glossy preview poses (`teapot.ppm`), normal lengths,
 mode timing, lighting response, counter math, depth addressing, integer square
 roots, specular accuracy, blended depth sorting, buffer guards and concurrent
 raster equivalence. The final red cycling showcase was approved on the S3.
@@ -56,3 +56,9 @@ raster equivalence. The final red cycling showcase was approved on the S3.
 The shared overlay shows field FPS, mean render MS, TRIS and render-time TRI/S.
 TRI/S uses summed triangle counts divided by summed render time, excluding
 scanout waits and pacing; MS includes scene setup and both raster workers.
+
+Painter sorting was explicitly compared against depth across 120 animated poses
+in all three shading modes. It causes visible wedges where the spout intersects
+the body, including with full per-object triangle sorting. This example keeps
+depth for that reason. See the separate [depth comparison](../esp32-depth-teapot/README.md)
+to inspect the speed/visibility tradeoff with fixed Phong shading.

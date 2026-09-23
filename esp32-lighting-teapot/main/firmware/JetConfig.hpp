@@ -14,6 +14,8 @@
 #define SCREEN_DOOR_ALPHA 0
 #define SKIP_ZERO_AREA_TRIANGLES 1
 #define NOISE_ALPHA 0
+// Required for the intersecting spout/body surfaces: painter sorting shows
+// visible wedges here, even with SORT_TRIANGLES=1. See VALIDATION.md.
 #define Z_BUFFERING 1
 #define SORT_TRIANGLES 0
 #define JET_DEPTH_SORT_OPAQUE_FRONT_TO_BACK 1

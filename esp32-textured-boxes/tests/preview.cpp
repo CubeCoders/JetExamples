@@ -7,8 +7,8 @@
 int main() {
     constexpr int w=480, h=320, stride=w/2, count=stride*h/2;
     std::vector<uint16_t> fields[2] = {std::vector<uint16_t>(count+16),std::vector<uint16_t>(count+16)};
-    std::vector<uint16_t> depth(stride*h);
-    Renderer::Scene scene(fields[0].data(),depth.data(),w,h);
+    static_assert(!Z_BUFFERING && FAST_Z);
+    Renderer::Scene scene(fields[0].data(),nullptr,w,h);
     scene.getRenderer()->interlacedMode = true;
     Boxes::init(scene);
     PerformanceOverlay display;
@@ -54,6 +54,15 @@ int main() {
         for(int y=0;y<h;++y) {
             Renderer::compositeSprites(pixels.data()+y*w,w,y,sprites.data(),int(sprites.size()));
             std::copy_n(pixels.data()+y*w,w,montage.data()+((pose/2)*h+y)*w*2+(pose%2)*w);
+        }
+    }
+    // Exercise every mapping/filter mode through more than five full turns,
+    // with no depth allocation. Render() checks both field guards each time.
+    for(int pose=0;pose<120;++pose) {
+        Boxes::time=pose*0.25f; Boxes::update(0);
+        for(int mode=0;mode<4;++mode) {
+            Boxes::selectMode(mode);
+            render();
         }
     }
     for(float t:{0.0f,2.999f,3.0f,5.999f,6.0f,8.999f,9.0f,11.999f,12.0f}) {

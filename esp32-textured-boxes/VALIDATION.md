@@ -58,3 +58,31 @@ Counter update: the overlay now includes mean render MS, and TRI/S is based
 on summed rendering time. Earlier throughput figures above used elapsed field
 time and remain historical measurements. The shared tests verify independence
 from frame pacing, weighted totals, sample resets and zero-duration safety.
+
+
+## Painter default after depth audit
+
+The measurements above describe the earlier depth-buffered builds. The final
+crate now uses `Z_BUFFERING=0`, `FAST_Z=1`, with stable painter buckets.
+It is a single convex backface-culled cube. Across 120 poses (30 seconds,
+over five turns), all four modes and both parities, only 850 of 36,864,000
+stored colour samples differ from depth. Differences are confined to shared
+edges; the worst view has 42 changed samples, at most five with a channel
+difference over 32. No face-order artefacts were visible in the compared views.
+
+Fresh S3 captures with the same 128x128 internal texture:
+
+| Visibility | Mean reported render time | Range | Field FPS |
+| --- | ---: | ---: | ---: |
+| Depth buffer | 12.47 ms | 10.95-14.43 ms | 59.99-60.00 |
+| Painter | 9.09 ms | 7.78-10.59 ms | 59.99-60.00 |
+
+About 27% less render time in these animated samples, not a fixed-pose benchmark.
+Both runs cover the same mode cycle; report windows can cross mode transitions.
+The 153,600-byte depth allocation is removed. Startup free internal memory is
+57,267 bytes and free PSRAM is 8,385,812 bytes. Texture placement remains DRAM.
+Scanout is 16.22-16.23 ms; no recovery yields or resets were observed.
+The painter firmware is 0x5c6b0 bytes (64% of its app partition remains free).
+
+The native test now renders all 120 poses in all modes with a null depth pointer,
+checking both field guards. Both preview and analytic texture-option tests pass.

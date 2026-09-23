@@ -73,3 +73,19 @@ Counter update: the overlay now includes mean render MS, and TRI/S is based
 on summed rendering time. Earlier throughput figures above used elapsed field
 time and remain historical measurements. The shared tests verify independence
 from frame pacing, weighted totals, sample resets and zero-duration safety.
+
+
+## Painter audit
+
+Compared depth, stable painter buckets, and buckets with `SORT_TRIANGLES=1`
+across 120 poses at 0.25-second intervals, each in all three shading modes and
+both field parities: 27,648,000 stored colour samples per variant. Painter
+buckets differ in 57,630 samples; full triangle sorting differs in 44,180.
+These are not just shared-edge ties: visibly incorrect wedges occur at the
+spout/body intersection even with full sorting. The lighting showcase retains
+depth. [Worst-view comparison](assets/painter-comparison.png): depth on the left,
+fully sorted painter in the middle, changed samples on the right.
+
+A fresh S3 baseline measured roughly 12 ms Flat, 14-17 ms Gouraud and 20 ms
+Phong in settled windows. Startup internal free memory is 93,779 bytes,
+insufficient for the 153,600-byte depth buffer. It remains in PSRAM.

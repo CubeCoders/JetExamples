@@ -33,11 +33,12 @@ flag cannot enable code excluded by a build option. Bilinear filtering currently
 applies to direct RGB565 textures; palette-indexed textures use nearest sampling.
 The material flag affects UVs; Phong-normal interpolation follows the build setting.
 
-Depth testing, flat face lighting and opaque front-to-back ordering are enabled.
+Flat face lighting and back-to-front painter buckets are enabled. The single
+convex cube needs no depth buffer; `Z_BUFFERING=0` and `FAST_Z=1` avoid
+per-pixel depth work and the 153,600-byte depth allocation.
 The 32 KiB crate texture is copied from flash into internal DRAM once at startup
 and shared by all four texture descriptors. If allocation fails, sampling falls
-back to the flash source. No extra image buffer is allocated when switching modes. The
-153,600-byte depth buffer is in PSRAM. Model rotation continues across switches;
+back to the flash source. No extra image buffer is allocated when switching modes. Model rotation continues across switches;
 counter samples can briefly include both modes around a transition.
 
 ## Build and validate
