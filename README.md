@@ -63,10 +63,11 @@ Implemented: [Utah teapot lighting](esp32-lighting-teapot/README.md) and
 [Texture Lab addressing, transparency, palettes and LOD](esp32-texture-features/README.md), and
 [CRT / Arcade in-place scanlines](esp32-postfx-crt/README.md), and
 [Cel / Teapot lighting quantisation](esp32-postfx-cel/README.md), and
-[Particle Lab](esp32-particles/README.md).
+[Particle Lab](esp32-particles/README.md), and
+[After Hours blending tricks](esp32-sprites-blending/README.md).
 Each showcase is reviewed on hardware before the next is started.
 
-Painter sorting is the default for the template cube, textured crate, island, neon car, Texture Lab, CRT / Arcade and Particle Lab.
+Painter sorting is the default for the template cube, textured crate, island, neon car, Texture Lab, CRT / Arcade, Particle Lab and After Hours.
 The lighting and cel teapots keep depth testing because its intersecting surfaces show
 visible sorting artefacts. The depth teapot explicitly demonstrates that tradeoff.
 

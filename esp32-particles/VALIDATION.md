@@ -48,5 +48,5 @@ flash textures. Firmware is **0x704f0 bytes**, leaving 56% of the 1 MiB applicat
 partition free. The board's existing physical 16 MiB / configured 8 MiB flash
 warning remains unchanged.
 
-The example is running on S3; physical-display visual approval is pending.
+The example was visually approved on S3 before starting After Hours.
 P4 defaults are supplied but were not tested on hardware.
