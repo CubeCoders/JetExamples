@@ -12,7 +12,7 @@ four triangles for its separately authored front and rear windows.
   it is not a physically based metal/roughness material.
 - A shared 256x256, 256-colour livery: 64 KiB of indices plus a 512-byte RGB565
   palette. Palette textures use nearest sampling and perspective-correct UVs.
-- A 128x64 RGB565 workshop panorama with bilinear filtering on the windows.
+- A 128x64 RGB565 workshop panorama with nearest sampling on the windows.
   `environmentReflectionUV` computes view-dependent reflection coordinates from
   world-space surface positions, normals and camera position. U is unwrapped
   across the panorama seam before triangle interpolation.
@@ -36,6 +36,10 @@ library; unresolved maps retain the material colour. The loader currently expect
 positive `v/vt/vn` face indices and triangles or quads. It is not a full OBJ/MTL
 implementation or an image decoder.
 
+Both textures use nearest sampling, and `BILINEAR_FILTER=0` removes the unused
+filtering path from this example. To compare filtered windows, enable that build
+option and set `environment.bilinear=true` in `Workshop::loadCar`.
+
 ## ESP32 performance
 
 The shared runtime provides the same dual-core rendering, queued scanout and
@@ -56,7 +60,8 @@ and wheel triangles have constant normals, so all are eligible without changing
 materials. Smooth triangles keep their interpolating path. Fixed-point colour
 rounding can differ slightly from the original per-pixel normal interpolation.
 
-Measured S3 cadence is approximately 51-58 fields/s after startup, up from 45-52
+Measured S3 cadence with nearest-sampled windows is approximately 52-59 fields/s
+after startup (55.9 average), up from 45-52
 before the constant-normal shortcut and 25-28 before the earlier optimisations. See [the validation record](VALIDATION.md) for conditions and limits.
 
 ## Build and preview

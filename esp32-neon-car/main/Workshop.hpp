@@ -102,7 +102,7 @@ inline Object* extract(Object* source,Material* material) {
 }
 inline void loadCar() {
  static char textureName[]="outrun.png";livery.name=textureName;livery.bilinear=false;
- environment.bilinear=true;
+ environment.bilinear=false;
  std::vector<Texture*> textures{&livery};
  Loader::LoadMtlData(Assets::mtl,&materials,&textures);
  auto* imported=Loader::LoadFromObjData(Assets::obj,nullptr,&materials,1.f/64.f);

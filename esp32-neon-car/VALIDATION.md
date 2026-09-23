@@ -107,3 +107,23 @@ The RGB565 livery occupies 128 KiB instead of 64 KiB of indices plus a 512-byte
 palette. The temporary benchmark held both formats; a permanent conversion would
 only need the RGB565 one. The original indexed demo source and firmware were
 restored after measurement; no benchmark mode was added to the published example.
+
+
+## Nearest-sampled windows (current configuration)
+
+The windows now use `environment.bilinear=false`. Both livery and environment
+textures use nearest sampling, so `BILINEAR_FILTER=0` also removes the unused
+filtering code from this example. Textures, geometry, orbit and Phong settings
+otherwise remain unchanged. Five native car/engine checks pass with this build.
+
+The S3 was built, flashed and measured over a full orbit. Omitting the initial
+reporting window, 19 windows average **55.92 fields/s** and **17.61 ms**
+render time; cadence ranges **52.14-58.77 fields/s**.
+Compared with the earlier normal-orbit run using bilinear windows (55.50 average),
+the gain is small and does not achieve a sustained 60. These separate orbit
+captures are approximate comparisons rather than matched-frame microbenchmarks.
+
+Scanout remains 16.34-16.35 ms. No recovery yields or unexpected resets were seen.
+Startup free internal memory is 74,211 bytes; free PSRAM is 8,242,504 bytes.
+Current firmware size is 0x75c60 bytes. The nearest-window version remains on S3
+for visual review. Historical filtering measurements above used bilinear windows.

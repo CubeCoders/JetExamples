@@ -23,7 +23,7 @@
 #define DEPTH_ALPHA_BLEND 0
 #define TEXTURE_MAPPING 1
 #define PERSPECTIVE_CORRECT_TEXTURES 1
-#define BILINEAR_FILTER 1
+#define BILINEAR_FILTER 0 // Both livery and environment use nearest sampling.
 #define LIGHTING 1
 #define Z_BRIGHTNESS 0
 #define FLOAT_CAMERA_ANGLES 1
