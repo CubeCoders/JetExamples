@@ -37,4 +37,5 @@ Startup free memory: 24,403 bytes internal, 8,371,984 bytes PSRAM.
 Firmware size: 0x6fee0 bytes. The plane uses one immutable 4 KiB texture
 shared by every echo; no additional image buffer is allocated.
 
-The example is running on the S3; physical-display approval is pending.
+The user approved Air Mail on the S3 and its demonstration of sprite effects
+over a 3D scene.
