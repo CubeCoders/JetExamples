@@ -1,0 +1,52 @@
+{
+  "mode": "built-in image_gen",
+  "carPrompt": "Use case: stylized-concept. Asset type: production design reference sheet for a low-poly ESP32 software-rendered cinematic, not a game screenshot. Design ONE original futuristic autonomous midnight-blue/silver wedge coupe for a neon 24th-century city chase with 1980s restraint. Long low chisel nose, broad chamfered fenders, black wraparound angular canopy, two thin ice-cyan rectangular headlights inset in a dark front fascia, continuous thin warm-red rear light, dark lower sill, FOUR clearly exposed cylindrical wheels with silver turbine-disc rims and cyan inner rings. Plausible car proportions: width 2.05m, length 4.7m, height 1.1m; wheels 0.62m diameter. Main body strong planar surfaces, shaped silhouette and panel seams, no texture decals or branding. The SAME wheels hinge from vertical road wheels to horizontal downward-facing hover discs; clean integrated wheel hinges, no bolted-on flying parts. No wings, no spoilers, no exposed rocket engines, no exhaust jets. Six precise consistent views on a neutral dark slate background: front three-quarter large main view, rear three-quarter, side elevation, top elevation, front elevation, small rear three-quarter hover mode showing all wheel discs facing the ground. Crisp restrained low-poly hard-surface 3D concept render; physically coherent geometry that can be reproduced with 350 triangles, no tiny greebles, no text or labels. Body should catch magenta/cyan environmental light while remaining visibly metallic blue-silver. No NASCAR proportions or livery. Landscape design sheet.",
+  "carPath": "car-design.png",
+  "commonPrompt": "Use case: stylized-concept. Asset type: one cinematic storyboard reference frame for a 480x320 ESP32 low-poly 3D film. Landscape 3:2 single panel, no storyboard border, no annotations or labels. Style: clean faceted retro-futuristic 3D with purposeful simple geometry and graphic texture details, sharp coherent perspective, dramatic neon cyan/magenta/amber, readable dark surfaces, wet reflections and luminous sprite-like halos. A production composition reference, not an impossible ultra-detailed render. Attached car sheet is DESIGN REFERENCE ONLY: keep its original blue-silver wedge silhouette and four wheels consistent when visible. Avoid copying the sheet layout. ",
+  "references": [
+    {
+      "beat": "01 River opening. Wide low camera across a river at night, dense varied towering city skyline behind a low illuminated bridge; shimmering long neon reflections, two sweeping sky beams, sparse large translucent holograms suspended between buildings. Compose a readable silhouette, foreground water lower half, strong central skyline, camera travels steadily right to left. No vehicle visible.",
+      "file": "cut-01.png"
+    },
+    {
+      "beat": "02 Rain district. Head-height camera inside a genuinely NARROW neon back street, road only TWO CAR WIDTHS across (4.5 metres), tall buildings enclose both edges, recessed tiny ramen shop and arcade storefronts, doors, roller shutters, projecting awnings, pipes, hanging signs cross above, puddles reflect lights. Looking straight down the corridor, rain streaks, low curb foreground close, no car yet. No freeway.",
+      "file": "cut-02.png"
+    },
+    {
+      "beat": "03 Courier overhead. Oblique overhead camera looking down into the same narrow two-car-width wet street, the referenced blue-silver wedge car racing forward occupying a meaningful fraction of road width. Close tightly packed shopfronts at both edges, sharp cyan/red reflected streaks on road, little spray and debris behind rear wheels. Car axis follows the street, believable scale, no wide empty pavement.",
+      "file": "cut-03.png"
+    },
+    {
+      "beat": "04 Front tracking. Low cinematic tracking camera ahead of the referenced wedge coupe, slightly off front-left, close and dramatic but enough room to see its silhouette. Same narrow rain-soaked neon shop corridor rushes past near both edges. Car fills lower centre third, black reflective canopy, cyan headlights, metallic blue planar hood, distant police-free street behind. Show clear camera clearance from walls.",
+      "file": "cut-04.png"
+    },
+    {
+      "beat": "05 Autonomous cockpit. Driver helmet height viewpoint inside the reference wedge car, looking forward through angular windshield down the close neon street. No person, no hands, compact empty steering yoke or absent wheel makes autonomy apparent. Garish but coherent 1980s amber segmented gauges, red scanning light bar, cyan displays on a dark faceted dashboard. Windscreen posts frame sides, street visible in upper half. No subtitles or HUD.",
+      "file": "cut-05.png"
+    },
+    {
+      "beat": "06 Eighty eight. Extreme close-up of the same physical dashboard, giant amber seven-segment '88' with small 'MPH', red scanner strip underneath, a few switches and angled instrument binnacle. Crisp tangible 1980s electronic automotive instrument, no street or exterior car. Dark navy framing, bright amber digits. Camera linearly pushes in.",
+      "file": "cut-06.png"
+    },
+    {
+      "beat": "07 Boulevard turn. Elevated three-quarter street-corner camera shows the reference blue-silver wedge coupe completing a RIGHT turn out of a narrow neon side street into a compact THREE-lane boulevard, each lane only 1.5 car widths. Other futuristic road cars aligned in lanes, clear intersection opening, closely enclosing tall storefront buildings, bollards and streetlights. Hero front wheels aligned with its arc; no drift. Dramatic perspective clear of geometry.",
+      "file": "cut-07.png"
+    },
+    {
+      "beat": "08 Pursuit. Low rear three-quarter chase camera close to the reference wedge car threading past a slower civilian car on a compact THREE-lane wet city boulevard. Two futuristic black-and-white police interceptors pursue behind with red-blue light bars. Near-side shop awnings and lamps sweep close to lens for speed, tall enclosing facades, no empty six-lane freeway, all cars plausibly aligned to road and no intersections between cars.",
+      "file": "cut-08.png"
+    },
+    {
+      "beat": "09 Hover conversion. Tight low rear three-quarter tracking view of the SAME reference wedge coupe on compact neon street. All four wheel assemblies are midway rotating from vertical driving position to horizontal discs aimed at ground, integrated smooth hinges, cyan hub rings brighten onto wet road. Body only just lifting above road. Police cars behind. No wings, NO rocket engines, no rear extensions, no exhaust plume. The wheel transformation is the entire visual event.",
+      "file": "cut-09.png"
+    },
+    {
+      "beat": "10 Ignition and rise. Low street-level camera watches the SAME wedge coupe shoot vertically upward between tall buildings, four horizontal hover wheels facing down, intense compact white-cyan light halos beneath wheels and bright bloom burst. Cars and rain below frozen in time. Rear body remains clean and unextended. No wings or rear engine, no rocket exhaust; antigravity shown through wheel light and levitating debris. Strong vertical composition inside landscape frame.",
+      "file": "cut-10.png"
+    },
+    {
+      "beat": "11 Above it all. High overhead descending view into the densely packed neon 24th-century city at night, layered rooftops and narrow ribbons of cyan and magenta-lit streets, river and central spire tie back to opening. Quiet dark sky framing corners for fade to black. No captions and no vehicle required. Elegant cinematic ending, purposeful large shapes.",
+      "file": "cut-11.png"
+    }
+  ]
+}

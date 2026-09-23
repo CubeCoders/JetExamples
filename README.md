@@ -37,7 +37,9 @@ The runtime preserves the game firmware's fast paths:
   portable RGB565 scanline compositing, including full-resolution overlays.
 
 This is 60 **fields** per second: each physical LCD row updates at 30 Hz.
-All examples display FPS, MS, TRIS and TRI/S in a full-resolution overlay:
+Feature examples display FPS, MS, TRIS and TRI/S in a full-resolution overlay.
+The cinematic `esp32-neon-film` deliberately shows only rounded FPS at top-right:
+
 - FPS is completed render fields per second, sampled over at least 0.5 seconds.
 - MS is mean elapsed `Scene::render` time, including setup, both raster workers and any registered RenderEffects callback,
   excluding animation, sprite callbacks, scanout waits and frame pacing.
@@ -66,7 +68,8 @@ Implemented: [Utah teapot lighting](esp32-lighting-teapot/README.md) and
 [Particle Lab](esp32-particles/README.md), and
 [After Hours blending tricks](esp32-sprites-blending/README.md), and
 [Air Mail sprite controls](esp32-sprite-controls/README.md), and
-[Woodland mesh LOD and billboards](esp32-lod-billboards/README.md).
+[Woodland mesh LOD and billboards](esp32-lod-billboards/README.md), and
+[ION, the eleven-shot cinematic](esp32-neon-film/README.md) (in review).
 Each showcase is reviewed on hardware before the next is started.
 
 Painter sorting is the default for the template cube, textured crate, island, neon car, Texture Lab, CRT / Arcade, Particle Lab, After Hours, Air Mail and Woodland.

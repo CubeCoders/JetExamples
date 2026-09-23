@@ -7,7 +7,11 @@
 // The frame task updates these pixels only between completed frames, before
 // notifying the render task. Texture storage is immutable throughout scanout.
 class PerformanceOverlay {
+    #if defined(JET_MINIMAL_PERFORMANCE_OVERLAY) && JET_MINIMAL_PERFORMANCE_OVERLAY
+    static constexpr int width=17, height=7;
+#else
     static constexpr int width=108, height=49;
+#endif
     std::array<uint16_t,width*height> pixels{};
     Renderer::Texture texture{width,height,pixels.data()};
     Renderer::Material material{0xffff,&texture};
@@ -32,12 +36,16 @@ class PerformanceOverlay {
         return data[c=='F'?10:c=='P'?11:c=='S'?12:c=='.'?13:c=='-'?14:c=='T'?16:c=='R'?17:c=='I'?18:c=='/'?19:c=='M'?20:15];
     }
     void line(const char* text, int top, int scale) {
-        for(int ch=0;text[ch] && (ch+1)*6*scale<=width;++ch) for(int x=0;x<5;++x)
+        for(int ch=0;text[ch] && (ch*6+5)*scale<=width;++ch) for(int x=0;x<5;++x)
             for(int y=0;y<7;++y) if(glyph(text[ch])[x]&(1<<y))
                 for(int yy=0;yy<scale;++yy) for(int xx=0;xx<scale;++xx)
                     pixels[(top+y*scale+yy)*width+ch*6*scale+x*scale+xx]=0xffff;
     }
     void draw(bool ready) {
+#if defined(JET_MINIMAL_PERFORMANCE_OVERLAY) && JET_MINIMAL_PERFORMANCE_OVERLAY
+        pixels.fill(0);
+        if(ready){char value[16];std::snprintf(value,sizeof(value),"%3u",(fps10+5)/10);line(value,0,1);}
+#else
         pixels.fill(0x0843);
         char label[32];
         if (ready) std::snprintf(label,sizeof(label),"FPS %2u.%u",fps10/10,fps10%10);
@@ -50,10 +58,15 @@ class PerformanceOverlay {
         line(label,29,1);
         std::snprintf(label,sizeof(label),"TRI/S %u",triangleRate);
         line(label,40,1);
+#endif
     }
 public:
     void attach(Renderer::Scene& scene,int screenWidth) {
+#if defined(JET_MINIMAL_PERFORMANCE_OVERLAY) && JET_MINIMAL_PERFORMANCE_OVERLAY
+        sprite.x=screenWidth-width;sprite.y=0;texture.hasAlpha=true;texture.alphaColor=0;
+#else
         sprite.x=screenWidth-width-16; sprite.y=17;
+#endif
         sprite.material=&material; sprite.zOrder=1000000;
         draw(false);
         scene.addSprite(&sprite);
