@@ -60,7 +60,8 @@ public:
     }
     // Call between completed frames. Count unique rasterized triangles after
     // culling (the two raster bands have already merged their flags).
-    // completedRenderUs measures that same field's Scene::render, in microseconds.
+    // completedRenderUs measures that field's Scene::render plus RenderEffects,
+    // in microseconds; completedTriangles includes the same additional geometry.
     void tick(int64_t now, unsigned completedTriangles, int64_t completedRenderUs) {
         if(!started) { sampleStart=now; started=true; return; }
         ++intervals;

@@ -11,5 +11,11 @@ namespace Esp32Jet {
 // The callbacks must not access the panel or start their own render passes.
 using Init = void (*)(Renderer::Scene&);
 using Update = void (*)(float seconds);
-void start(Init init, Update update, Update afterRender = nullptr);
+// Optional renderEffects appends geometry (for example ParticleSystem::render)
+// to the completed scene field, on core 1 after raster workers have joined.
+// Return the additional accepted triangle count. Its cost is included in MS and
+// TRI/S. Do not clear, swap or advance the scene, or mutate pixels used by scanout.
+using RenderEffects = unsigned (*)(Renderer::Scene& scene);
+void start(Init init, Update update, Update afterRender = nullptr,
+           RenderEffects renderEffects = nullptr);
 }

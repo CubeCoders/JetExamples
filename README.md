@@ -39,7 +39,7 @@ The runtime preserves the game firmware's fast paths:
 This is 60 **fields** per second: each physical LCD row updates at 30 Hz.
 All examples display FPS, MS, TRIS and TRI/S in a full-resolution overlay:
 - FPS is completed render fields per second, sampled over at least 0.5 seconds.
-- MS is mean elapsed `Scene::render` time, including setup and both raster workers,
+- MS is mean elapsed `Scene::render` time, including setup, both raster workers and any registered RenderEffects callback,
   excluding animation, sprite callbacks, scanout waits and frame pacing.
 - TRIS is the most recently completed field's unique rasterized triangle count
   after culling and clipping. It counts triangles accepted for rasterization,
@@ -62,10 +62,11 @@ Implemented: [Utah teapot lighting](esp32-lighting-teapot/README.md) and
 [Neon Motorworks model loading and environment mapping](esp32-neon-car/README.md), and
 [Texture Lab addressing, transparency, palettes and LOD](esp32-texture-features/README.md), and
 [CRT / Arcade in-place scanlines](esp32-postfx-crt/README.md), and
-[Cel / Teapot lighting quantisation](esp32-postfx-cel/README.md).
+[Cel / Teapot lighting quantisation](esp32-postfx-cel/README.md), and
+[Particle Lab](esp32-particles/README.md).
 Each showcase is reviewed on hardware before the next is started.
 
-Painter sorting is the default for the template cube, textured crate, island, neon car, Texture Lab and CRT / Arcade.
+Painter sorting is the default for the template cube, textured crate, island, neon car, Texture Lab, CRT / Arcade and Particle Lab.
 The lighting and cel teapots keep depth testing because its intersecting surfaces show
 visible sorting artefacts. The depth teapot explicitly demonstrates that tradeoff.
 

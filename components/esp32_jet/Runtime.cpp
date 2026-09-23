@@ -23,6 +23,7 @@ Renderer::Scene* scene = nullptr;
 Init initScene = nullptr;
 Update updateScene = nullptr;
 Update afterRenderScene = nullptr;
+RenderEffects renderEffectsScene = nullptr;
 Renderer::Scene::RasterExecutor executor = nullptr;
 TaskHandle_t renderTask = nullptr;
 SemaphoreHandle_t renderDone = nullptr;
@@ -69,6 +70,8 @@ void render(void*) {
         const int64_t start = esp_timer_get_time();
         scene->setFramebuffer(renderBuffer);
         scene->render(measuredRaster);
+        if (renderEffectsScene)
+            scene->lastFrameRasterizedTriangles += renderEffectsScene(*scene);
         renderUs = esp_timer_get_time() - start;
         if (afterRenderScene) afterRenderScene(elapsed);
         xSemaphoreGive(renderDone);
@@ -141,11 +144,12 @@ void run(void*) {
 }
 }
 
-void start(Init init, Update update, Update afterRender) {
+void start(Init init, Update update, Update afterRender, RenderEffects renderEffects) {
     configASSERT(init && !initScene);
     initScene = init;
     updateScene = update;
     afterRenderScene = afterRender;
+    renderEffectsScene = renderEffects;
     const BaseType_t created = xTaskCreatePinnedToCore(run, "JetFrame", 8192,
                                                        nullptr, 2, nullptr, 0);
     configASSERT(created == pdPASS);
