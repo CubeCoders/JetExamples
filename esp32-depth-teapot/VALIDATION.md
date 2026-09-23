@@ -43,4 +43,4 @@ not enough free internal RAM for the current full-height depth buffer.
 Firmware size is 0x5ca00 bytes; 64% of the 1 MiB app partition remains free.
 
 P4 defaults are included but have not been built or hardware-tested for this
-example. Visual review of the seven-second version is pending on S3.
+example. The seven-second version was visually approved on S3.
