@@ -14,7 +14,7 @@ The cube remains the minimal reusable template.
 | 03c | `esp32-neon-car` | Runtime OBJ/MTL loading, indexed livery, textured glossy Phong, view-dependent environment mapping on separate windows, neon workshop | Approved on S3 |
 | 04 | `esp32-shading-gallery` | Flat, Gouraud, Phong, unlit and wireframe comparisons; per-face materials; coloured ambient and depth brightness | Planned |
 | 05 | `esp32-postfx-crt` | Seven-second CRT off/on comparison, bright arcade test card, matched rotating cube, physical-row scanlines without an extra buffer | Approved on S3 |
-| 06 | `esp32-postfx-cel` | Zero-extra-buffer quantised lighting/cel shading, compared with smooth shading | Planned |
+| 06 | `esp32-postfx-cel` | Seven-second smooth/cel comparison on the glossy red teapot, four diffuse bands, no extra effect buffer | Approved on S3 |
 | 07 | `esp32-particles` | Fixed particle pools, sparks, water splashes, lifetime, gravity, distance culling, additive effects | Planned |
 | 08 | `esp32-sprites-blending` | Full-resolution overlays, colour keys, combined alpha, additive blending, scaling, flips/mirrored quarters, z-order, fades and letterboxing; 3D blend modes | Planned |
 | 09 | `esp32-geometry-depth` | Primitives, billboards, near/far clipping, culling, depth bias, optional Z buffering, picking and distance/LOD fades | Planned |
