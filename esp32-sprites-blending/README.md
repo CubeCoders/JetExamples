@@ -2,8 +2,10 @@
 
 A warm/cool pair of lamps, a late-night cafe, planters and a slowly rotating
 faceted sculpture demonstrate how simple blending can suggest expensive lighting
-and reflections. Everything is authored as small unlit meshes. The camera sways
-gently across the courtyard so the mirrored floor follows the changing view.
+and reflections. Everything is authored as small unlit meshes. The camera sweeps
+across the courtyard, moving closer and rising and falling so the mirrored floor
+follows the changing view. Its 14-second path spans X +/-360, Y 415-545 and
+Z -1190 to -1010, looking towards the sculpture at (0, 135, 90).
 
 The 42-second loop opens with the complete scene for 14 seconds, then spends
 seven seconds on each step: bare geometry, mirror floor, additive light meshes,
@@ -84,7 +86,7 @@ ctest --test-dir build-preview -C Release --output-on-failure
 The native test checks mirror positions/winding, floor-layer differences,
 additive-only brightening, separate sprite halos, packed-field guards,
 serial/parallel equivalence and stage transitions. It emits `courtyard.ppm`,
-with two views of the finished composition and the four construction steps.
+with four views around the camera path and the four construction steps.
 Preview performance counters are placeholders.
 
 Generated headers and source artwork are checked in. Regenerate with Pillow and

@@ -97,7 +97,8 @@ inline void select(int next) {
 inline void update(float dt) {
  time=std::fmod(time+dt,42.f);select(time<14?0:1+int((time-14)/7));
  const float a=time*2*pi/14;
- camera.setPosition(int(210*std::sin(a)),540+int(25*std::sin(a)), -1350+int(50*std::cos(a)));camera.lookAt({0,115,90});
+ // A closer, wider sweep with a gentle rise and fall reveals the floor trick.
+ camera.setPosition(int(360*std::sin(a)),480+int(65*std::sin(a+.6f)), -1100+int(90*std::cos(a)));camera.lookAt({0,135,90});
  const int yaw=int(time*360/14)%360,pitch=int(10*std::sin(a));jewel->setRotation(pitch,yaw,0);jewelMirror->setRotation(-pitch,yaw,0);
  for(int i=0;i<2;++i) {
   const auto view=camera.transformDirection(lampHeads[i]-camera.position);

@@ -53,3 +53,19 @@ versus 8 MiB configured flash warning is unchanged.
 
 The example is running on S3 for physical-display feedback; visual approval is
 pending. P4 defaults are provided but were not tested on hardware.
+
+## Closer camera revision
+
+The camera now moves across X +/-360 (previously +/-210), rises and falls
+through Y 415-545, and moves between Z -1190 and -1010. The 14-second
+cycle retains a controlled forward-facing arc. Native checks passed with eight
+serial/parallel comparisons, including four quarter-cycle camera views; the
+resulting montage was inspected for framing and floor coverage.
+
+Rebuilt and flashed on S3. A 22-second serial capture covers the full camera
+cycle with all layers, followed by the bare stage. The 13 complete-scene reporting
+windows averaged 58.90 fields/s, ranging 57.90-59.42,
+with render time 10.02-11.45 ms. The larger on-screen scene slightly
+increases fill/scanout cost relative to the previous camera. No panics, unexpected
+resets or idle recovery were observed. Firmware size is 0x7bc30 bytes.
+Physical-display feedback on the new camera is pending.
