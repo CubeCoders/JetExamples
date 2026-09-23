@@ -56,8 +56,8 @@ inline void makeRoom() {
  // band; no depth buffer and no coplanar painter fights with the car.
  auto* lines=new Object;lines->cullingMode=CullingMode::NO_CULLING;
  auto* grid=paint(0x132633);
- for(int n=-8;n<=8;++n) {
-  int q=n*220;
+ for(int n=-4;n<=4;++n) {
+  int q=n*440;
   quad(lines,{q-2,1,-1800},{q+2,1,-1800},{q+2,1,1800},{q-2,1,1800},grid);
   quad(lines,{-1800,1,q-2},{1800,1,q-2},{1800,1,q+2},{-1800,1,q+2},grid);
  }
@@ -71,13 +71,9 @@ inline void makeRoom() {
   quad(lines,pos(a,685,19),pos(a,694,19),pos(b,694,19),pos(b,685,19),i%8<4?cyan:pink);
  }
  put(lines,true);lines=new Object;lines->cullingMode=CullingMode::NO_CULLING;
- // A soft-looking baked contact shadow beneath the stationary car.
+ // One rectangular contact-shadow quad beneath the stationary car.
  auto* shadow=paint(0x0D1524);
- for(int i=0;i<24;++i) {
-  float a=2*pi*i/24,b=2*pi*(i+1)/24;
-  quad(lines,{0,20,0},{int(235*std::sin(a)),20,int(550*std::cos(a))},
-       {int(235*std::sin(b)),20,int(550*std::cos(b))},{0,20,0},shadow);
- }
+ quad(lines,{-235,20,-550},{235,20,-550},{235,20,550},{-235,20,550},shadow);
  put(lines,true);
  // Wall-mounted workshop ribs stay outside the camera orbit, so the car
  // remains unobstructed while different light banks pass behind it.

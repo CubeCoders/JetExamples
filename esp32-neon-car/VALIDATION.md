@@ -150,3 +150,26 @@ sustained 60; separate moving-orbit captures are approximate comparisons.
 Scanout is 16.34-16.36 ms, with no recovery yields or unexpected resets observed.
 Startup internal/PSRAM free memory remains 74,211 / 8,242,504 bytes. Firmware size
 is 0x75cd0 bytes. This version remains running on S3 for visual review.
+
+
+## Coarser grid and rectangular shadow (current configuration)
+
+Grid spacing doubles from 220 to 440 units while retaining its footprint and line
+width: 34 quads / 68 triangles become 18 quads / 36 triangles. The oval shadow
+becomes one rectangular quad / two triangles with the same 470-by-1100 bounds.
+Its former 24-segment fan stored 48 triangles, including 24 degenerates; this
+change removes 78 stored triangles overall (54 non-degenerate source triangles).
+Both surfaces remain unlit and untextured, with no depth buffer.
+
+Five native checks pass, including four orbit previews, buffer guards and 32
+parallel-band comparisons. The build was flashed to S3 and captured over a full
+orbit. Excluding the initial window, 21 windows average **59.79 fields/s**,
+**15.61 ms** render time and **4.80 ms** setup time. Cadence ranges
+**58.73-59.95 fields/s**; render time ranges
+14.49-16.70 ms. This is close to the 60-field pacing limit,
+with small dips rather than a guarantee of a locked 60. The previous scene
+averaged 56.69 fields/s and 17.36 ms render time in a separate orbit capture.
+
+Scanout remains 16.33-16.35 ms. No recovery yields or unexpected resets were seen.
+Startup internal/PSRAM free memory is 74,031 / 8,255,844 bytes. Firmware size is
+0x75c10 bytes. The coarser grid and rectangular shadow remain on S3 for review.

@@ -21,10 +21,14 @@ four triangles for its separately authored front and rear windows.
 - Opaque chrome-style windows reflect the distant-room panorama. This is an
   approximation: it does not capture the current framebuffer, reflect the car
   itself, or reproduce nearby geometry with parallax.
-- Unlit workshop geometry, neon strips and a baked contact-shadow shape, with
+- Unlit workshop geometry, neon strips and a rectangular contact shadow, with
   painter sorting and no depth allocation. Background geometry is submitted
   before the sorted body and windows. This arrangement is tailored to the orbit;
   it is not a general solution for arbitrary intersecting models.
+
+The floor grid uses 440-unit cells (18 narrow quads, 36 triangles). The shadow
+is one two-triangle rectangle covering the same outer bounds as the former oval.
+Both remain untextured, unlit geometry.
 
 The original export shares the body material with its first wheel. Asset
 preparation rebinds only that wheel to an existing, identical wheel material
@@ -67,8 +71,8 @@ the 200 wheel triangles bypass lighting entirely. Smooth triangles keep their
 interpolating path. Fixed-point colour
 rounding can differ slightly from the original per-pixel normal interpolation.
 
-Measured S3 cadence with nearest-sampled windows and unlit wheels is approximately
-53-59 fields/s after startup (56.7 average), up from 45-52
+Measured S3 cadence with the simplified floor/shadow, nearest-sampled windows and
+unlit wheels averages 59.8 fields/s after startup. Earlier versions ran at 45-52
 before the constant-normal shortcut and 25-28 before the earlier optimisations. See [the validation record](VALIDATION.md) for conditions and limits.
 
 ## Build and preview
