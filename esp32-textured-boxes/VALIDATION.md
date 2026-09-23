@@ -1,0 +1,55 @@
+# Texture showcase validation - 2026-09-23
+
+ESP32-S3 revision 0.2, 240 MHz, 8 MiB octal PSRAM at 80 MHz; 480x320 panel,
+80 MHz SPI, eight-row DMA queue, half-width alternating field buffers.
+Built with ESP-IDF 6.0.1 and flashed to the connected S3.
+
+## Texture size and memory placement
+
+The final scene uses a plain 200-unit cube at Z=520, yawing at 65 degrees/second
+with rocking on the other axes. Mapping/filtering changes every three seconds.
+All four modes share one texture. Separate 24-second serial captures measured:
+
+| Texture | Storage sampled | Field FPS | Observed render time |
+| --- | --- | ---: | ---: |
+| 64x64, 8 KiB | Flash | 59.99-60.00 | 10.76-14.18 ms |
+| 256x256, 128 KiB | Flash | 43.37-58.11 | 15.50-23.06 ms |
+| 128x128, 32 KiB | Flash | 59.99-60.00 | 11.35-14.93 ms |
+| 128x128, 32 KiB | Internal DRAM | 59.99-60.00 | 10.64-14.03 ms |
+
+The 128x128 flash and DRAM captures each contain 22 reporting windows across
+all four modes. Their mean render times are 13.03 and 12.16 ms respectively:
+about 0.87 ms (6.7%) less render time with DRAM. Both reach the 60-field cap.
+These are animated workloads with minor timing/pose differences, not fixed-pose
+microbenchmarks or guaranteed frame rates. Mode transitions can cross a window.
+
+The final startup log confirms `128x128, 32768 bytes, internal DRAM` and
+60,435 bytes of internal heap free after runtime setup, versus 93,223 with
+flash sampling. PSRAM free is unchanged at 8,232,208 bytes. The depth buffer
+uses PSRAM. The texture is allocated once with internal/8-bit capabilities;
+allocation failure retains flash sampling. No allocations occur on mode changes.
+
+The final firmware occupies 0x5c3d0 bytes of the 1 MiB app partition;
+0xa3c30 bytes (64%) remain free. The original texture also remains in flash.
+Scanout measures 16.24-16.25 ms. No idle-recovery yields, allocation failures
+or resets occurred during the final capture. The cube has 12 source triangles;
+the overlay counts triangles actually accepted for rasterization per field.
+FPS means render fields/second: each physical LCD row updates on alternate fields.
+
+## Correctness
+
+- Native cube preview and texture-option tests pass with the final 128x128 asset.
+  All four modes are rendered at the same pose for visual comparison.
+- Mode timing, clock wrap, framebuffer guards, cube triangle count, and FPS/TRIS/
+  TRI/S sampling with constant and varying triangle counts are checked.
+- Independent material mapping and texture filtering are checked against analytic
+  reference texels. Indexed textures safely retain nearest sampling.
+- Texture-option checks pass for all four build-capability combinations, including
+  attempts to enable a feature compiled out of the engine.
+- The existing affine interpolation oracle passes after correcting its field-row
+  parity reference to use absolute row parity, matching renderer addressing.
+- Six teapot host checks and three shared template/runtime checks passed with the
+  engine texture changes. Final S3 build, flash and runtime verification pass.
+
+P4 defaults are included; this showcase has not been tested on P4 hardware.
+Final visual approval on S3 is pending before the next showcase begins.

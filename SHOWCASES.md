@@ -7,7 +7,8 @@ The cube remains the minimal reusable template.
 | Order | Project | Features to demonstrate | Status |
 | --- | --- | --- | --- |
 | 01 | `esp32-lighting-teapot` | Authentic Utah teapot, smooth normals, Flat/Gouraud/Phong cycle, ambient/directional lighting, diffuse/specular material controls, additive gloss, FPS/TRIS/TRI/S overlay | Approved on S3 |
-| 02 | `esp32-textured-boxes` | UVs, affine/perspective mapping, wrap/clamp/keyed textures, filtering, animated palettes | Planned |
+| 02 | `esp32-textured-boxes` | Large crate cube; affine/perspective mapping and nearest/bilinear cycle | On S3; hardware review pending |
+| 02b | `esp32-texture-features` | Wrap/clamp/zero addressing, keyed textures, animated palettes, texture LOD | Planned |
 | 03 | `esp32-tropical-island` | Game-style sky gradient, fog, beach and palm geometry, orbit camera, rippled water, previous-field reflections, additive sun/lens-flare sprites and picking-based occlusion | Planned |
 | 04 | `esp32-shading-gallery` | Flat, Gouraud, Phong, unlit and wireframe comparisons; per-face materials; coloured ambient and depth brightness | Planned |
 | 05 | `esp32-postfx-crt` | Zero-extra-buffer CRT scanlines, using a scene with readable fine detail | Planned |

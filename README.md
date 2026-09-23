@@ -52,7 +52,8 @@ The cube is deliberately small; it is not a renderer throughput benchmark.
 ## Showcases
 
 See [the S3 showcase series](SHOWCASES.md) for coverage and review progress.
-The first example is [Utah teapot lighting](esp32-lighting-teapot/README.md).
+Implemented: [Utah teapot lighting](esp32-lighting-teapot/README.md) and
+[crate texture mapping/filtering](esp32-textured-boxes/README.md).
 Each showcase is reviewed on hardware before the next is started.
 
 ## Host checks

@@ -67,4 +67,4 @@ brighter gradient, cycle and additional optimisations were subsequently approved
   also pass. The glossy S3 firmware build and flash pass.
 
 P4 wiring/defaults are provided; this showcase has not been hardware-tested on P4.
-Only this first showcase is implemented. Hardware feedback gates the next one.
+This showcase was approved on hardware before work began on the texture example.
