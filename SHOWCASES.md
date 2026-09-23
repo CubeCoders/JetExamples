@@ -8,12 +8,12 @@ The cube remains the minimal reusable template.
 | --- | --- | --- | --- |
 | 01 | `esp32-lighting-teapot` | Authentic Utah teapot, smooth normals, Flat/Gouraud/Phong cycle, ambient/directional lighting, diffuse/specular material controls, additive gloss, FPS/TRIS/TRI/S overlay | Approved on S3 |
 | 02 | `esp32-textured-boxes` | Large crate cube; affine/perspective mapping and nearest/bilinear cycle | Approved on S3 |
-| 02b | `esp32-texture-features` | Seven-stage Texture Lab: wrap/clamp/zero addressing, keyed foliage, indexed lava palette cycling, matched texture-LOD sweeps | On S3; visual review pending |
+| 02b | `esp32-texture-features` | Seven-stage Texture Lab: wrap/clamp/zero addressing, keyed foliage, indexed lava palette cycling, matched texture-LOD sweeps | Approved on S3 |
 | 03 | `esp32-tropical-island` | Game-style sky gradient, beach and palm geometry, orbit and distance variation, painter sorting, rippled water, previous-field reflections, additive sun/lens-flare sprites and picking-based occlusion | Approved on S3 |
 | 03b | `esp32-depth-teapot` | Fixed glossy Phong; seven-second painter/depth cycle on matched motion, overlap artefacts and timing/memory tradeoff | Approved on S3 |
 | 03c | `esp32-neon-car` | Runtime OBJ/MTL loading, indexed livery, textured glossy Phong, view-dependent environment mapping on separate windows, neon workshop | Approved on S3 |
 | 04 | `esp32-shading-gallery` | Flat, Gouraud, Phong, unlit and wireframe comparisons; per-face materials; coloured ambient and depth brightness | Planned |
-| 05 | `esp32-postfx-crt` | Zero-extra-buffer CRT scanlines, using a scene with readable fine detail | Planned |
+| 05 | `esp32-postfx-crt` | Seven-second CRT off/on comparison, bright arcade test card, matched rotating cube, physical-row scanlines without an extra buffer | Approved on S3 |
 | 06 | `esp32-postfx-cel` | Zero-extra-buffer quantised lighting/cel shading, compared with smooth shading | Planned |
 | 07 | `esp32-particles` | Fixed particle pools, sparks, water splashes, lifetime, gravity, distance culling, additive effects | Planned |
 | 08 | `esp32-sprites-blending` | Full-resolution overlays, colour keys, combined alpha, additive blending, scaling, flips/mirrored quarters, z-order, fades and letterboxing; 3D blend modes | Planned |

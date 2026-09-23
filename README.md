@@ -60,10 +60,11 @@ Implemented: [Utah teapot lighting](esp32-lighting-teapot/README.md) and
 [the tropical island](esp32-tropical-island/README.md), and
 [depth testing](esp32-depth-teapot/README.md), and
 [Neon Motorworks model loading and environment mapping](esp32-neon-car/README.md), and
-[Texture Lab addressing, transparency, palettes and LOD](esp32-texture-features/README.md).
+[Texture Lab addressing, transparency, palettes and LOD](esp32-texture-features/README.md), and
+[CRT / Arcade in-place scanlines](esp32-postfx-crt/README.md).
 Each showcase is reviewed on hardware before the next is started.
 
-Painter sorting is the default for the template cube, textured crate, island, neon car and Texture Lab.
+Painter sorting is the default for the template cube, textured crate, island, neon car, Texture Lab and CRT / Arcade.
 The lighting teapot keeps depth testing because its intersecting surfaces show
 visible sorting artefacts. The depth teapot explicitly demonstrates that tradeoff.
 

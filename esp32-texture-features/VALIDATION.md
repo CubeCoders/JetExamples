@@ -51,5 +51,5 @@ additional. Firmware is **0x991b0 bytes**, leaving 40% of the 1 MiB application
 partition free. The board's existing 16 MiB physical / 8 MiB configured flash
 warning is unchanged.
 
-The example is running on the S3 for display-level feedback. Physical-display
-visual approval is pending. P4 defaults are supplied but were not tested here.
+The example is running on the S3 for display-level feedback. The complete effect cycle was subsequently
+visually approved on the S3 before starting CRT / Arcade. P4 defaults are supplied but were not tested here.
