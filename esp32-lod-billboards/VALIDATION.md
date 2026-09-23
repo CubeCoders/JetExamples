@@ -118,4 +118,4 @@ were observed. Stage means omit the first reporting window after each switch.
 
 Startup free memory: 61,435 bytes internal and 8,334,852 bytes PSRAM.
 Firmware size: 0x75f20 bytes.
-The revised pine demo is running on S3 for physical-display feedback.
+The user approved the revised pine demo on S3, confirming that it clearly demonstrates the LOD effect.
