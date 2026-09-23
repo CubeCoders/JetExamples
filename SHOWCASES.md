@@ -11,7 +11,7 @@ The cube remains the minimal reusable template.
 | 02b | `esp32-texture-features` | Wrap/clamp/zero addressing, keyed textures, animated palettes, texture LOD | Planned |
 | 03 | `esp32-tropical-island` | Game-style sky gradient, beach and palm geometry, orbit and distance variation, painter sorting, rippled water, previous-field reflections, additive sun/lens-flare sprites and picking-based occlusion | Approved on S3 |
 | 03b | `esp32-depth-teapot` | Fixed glossy Phong; seven-second painter/depth cycle on matched motion, overlap artefacts and timing/memory tradeoff | Approved on S3 |
-| 03c | `esp32-neon-car` | Runtime OBJ/MTL loading, indexed livery, textured glossy Phong, view-dependent environment mapping on separate windows, dark neon workshop | Initial appearance approved; dark/orientation/performance revision on S3 for review |
+| 03c | `esp32-neon-car` | Runtime OBJ/MTL loading, indexed livery, textured glossy Phong, view-dependent environment mapping on separate windows, neon workshop | Initial appearance approved; dark/orientation/performance revision on S3 for review |
 | 04 | `esp32-shading-gallery` | Flat, Gouraud, Phong, unlit and wireframe comparisons; per-face materials; coloured ambient and depth brightness | Planned |
 | 05 | `esp32-postfx-crt` | Zero-extra-buffer CRT scanlines, using a scene with readable fine detail | Planned |
 | 06 | `esp32-postfx-cel` | Zero-extra-buffer quantised lighting/cel shading, compared with smooth shading | Planned |

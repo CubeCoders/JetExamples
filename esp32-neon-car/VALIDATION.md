@@ -185,3 +185,20 @@ Five native checks pass and four orbit views were inspected. The S3 build was
 flashed and a short startup/render capture checked. The earlier full-orbit timing
 above belongs to the larger rectangle; no new full-orbit benchmark was needed
 for this size adjustment.
+
+
+## Brighter scene palette (current configuration)
+
+Raised the unlit floor, walls, platform, ribs, grid and background colours while
+retaining the cyan/magenta neon accents. Body ambient lighting rises from
+RGB (95, 87, 120) to (130, 123, 150); directional lighting and Phong specular
+settings are unchanged. The generated window panorama also has brighter dark
+tones. The inset shadow remains dark enough to separate it from the platform.
+
+Five native checks pass and four orbit previews were inspected. Built and flashed
+to the S3, then captured over a full orbit. Excluding startup, 21 windows
+average **59.77 fields/s** and **15.65 ms** render time, with cadence ranging
+**58.68-59.95 fields/s**. No recovery yields or unexpected
+resets were observed. Firmware size is 0x75c20 bytes; startup memory remains
+74,031 bytes internal and 8,255,844 bytes PSRAM free. The brighter version is
+running on S3 for display-level visual feedback.

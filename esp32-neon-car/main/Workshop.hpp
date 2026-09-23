@@ -19,7 +19,7 @@ inline constexpr float pi=3.14159265359f;
 inline Scene* scene=nullptr;
 inline Camera camera;
 inline DirectionalLight key({220,52,0},{205,231,255},255);
-inline AmbientLight ambient({95,87,120});
+inline AmbientLight ambient({130,123,150});
 inline float time=0;
 inline Object* car=nullptr;
 inline std::array<Object*,2> windows{};
@@ -41,8 +41,8 @@ inline void box(int x,int y,int z,int w,int h,int d,Material* m,bool background=
  auto* o=Primitives::createCube(w,h,d,m);o->setPosition(x,y,z);put(o,background);
 }
 inline void makeRoom() {
- auto* floor=paint(0x080F1B);auto* wall=paint(0x070B17);auto* wallAlt=paint(0x100A1E);
- auto* frame=paint(0x111C2B);auto* cyan=paint(0x32D7EC);auto* pink=paint(0xE542BC);auto* white=paint(0xA4C5D8);
+ auto* floor=paint(0x19283A);auto* wall=paint(0x141C2F);auto* wallAlt=paint(0x231733);
+ auto* frame=paint(0x26354A);auto* cyan=paint(0x32D7EC);auto* pink=paint(0xE542BC);auto* white=paint(0xA4C5D8);
  auto* room=new Object;room->cullingMode=CullingMode::NO_CULLING;
  quad(room,{-2300,0,-2300},{2300,0,-2300},{2300,0,2300},{-2300,0,2300},floor);
  for(int i=0;i<8;++i) {
@@ -55,14 +55,14 @@ inline void makeRoom() {
  // Floor lanes, octagonal service platform and inset rim share a background
  // band; no depth buffer and no coplanar painter fights with the car.
  auto* lines=new Object;lines->cullingMode=CullingMode::NO_CULLING;
- auto* grid=paint(0x132633);
+ auto* grid=paint(0x2D4E60);
  for(int n=-4;n<=4;++n) {
   int q=n*440;
   quad(lines,{q-2,1,-1800},{q+2,1,-1800},{q+2,1,1800},{q-2,1,1800},grid);
   quad(lines,{-1800,1,q-2},{1800,1,q-2},{1800,1,q+2},{-1800,1,q+2},grid);
  }
  put(lines,true);lines=new Object;lines->cullingMode=CullingMode::NO_CULLING;
- auto* deck=paint(0x162134);auto* edge=paint(0x090F18);
+ auto* deck=paint(0x2A3C51);auto* edge=paint(0x131F2F);
  for(int i=0;i<32;++i) {
   float a=2*pi*i/32,b=2*pi*(i+1)/32;
   auto pos=[](float a,float radius,int y){return Vector3{int(radius*std::sin(a)),y,int(radius*std::cos(a))};};
@@ -72,7 +72,7 @@ inline void makeRoom() {
  }
  put(lines,true);lines=new Object;lines->cullingMode=CullingMode::NO_CULLING;
  // Inset from the car's roughly 398-by-1019 footprint on the platform.
- auto* shadow=paint(0x0D1524);
+ auto* shadow=paint(0x121D2D);
  quad(lines,{-180,20,-465},{180,20,-465},{180,20,465},{-180,20,465},shadow);
  put(lines,true);
  // Wall-mounted workshop ribs stay outside the camera orbit, so the car
@@ -154,7 +154,7 @@ inline void init(Scene& target) {
  scene=&target;camera.setFOV(62.0f,Display::RENDER_WIDTH);camera.nearPlane=96;camera.farPlane=6000;
  scene->setCamera(&camera);scene->setDirectionalLight(&key);scene->setAmbientLight(&ambient);
  scene->setClearBuffer(true);
- for(int y=0;y<Display::RENDER_HEIGHT;++y)sky[y]=rgb(0x050B14);
+ for(int y=0;y<Display::RENDER_HEIGHT;++y)sky[y]=rgb(0x0F1827);
  scene->backgroundGradientColors=sky;
 #if defined(ESP_PLATFORM) && defined(CONFIG_SPIRAM)
  // Mesh arrays are static after startup. Keep larger allocations in PSRAM

@@ -38,7 +38,7 @@ env=Image.new('RGB',(128,64));pixels=[]
 for y in range(64):
  v=(y+.5)/64
  for x in range(128):
-  u=(x+.5)/128;col=[10,18,36] if v<.5 else [5,10,20]
+  u=(x+.5)/128;col=[22,34,54] if v<.5 else [12,21,35]
   for i in range(8):
    center=(.5+i/8)%1;du=abs((u-center+.5)%1-.5)
    strength=max(0,1-du/.016)*max(0,1-abs(v-.34)/.24)

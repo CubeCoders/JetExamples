@@ -1,6 +1,6 @@
 # Neon Motorworks - imported model and environment mapping
 
-A 20-second camera orbit around a glossy race car in a dark neon workshop.
+A 20-second camera orbit around a glossy race car in a neon workshop.
 The supplied OBJ and MTL are parsed by Jet at startup: this is a model-loading
 example, not a generated C++ mesh. The car contains 404 triangles, including
 four triangles for its separately authored front and rear windows.
@@ -25,6 +25,10 @@ four triangles for its separately authored front and rear windows.
   painter sorting and no depth allocation. Background geometry is submitted
   before the sorted body and windows. This arrangement is tailored to the orbit;
   it is not a general solution for arbitrary intersecting models.
+
+The workshop palette and window panorama have lifted dark tones for the S3
+display. Body ambient lighting is RGB (130, 123, 150), preserving the cool/purple
+tint and existing directional/specular settings.
 
 The floor grid uses 440-unit cells (18 narrow quads, 36 triangles). The shadow
 is one two-triangle, 360-by-930 rectangle inset from the car's footprint.
