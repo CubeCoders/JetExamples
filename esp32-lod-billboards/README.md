@@ -39,8 +39,12 @@ triangle work. The reference pass disables the mesh LOD/fade and the impostor.
 
 The billboard follows camera yaw while remaining upright; it preserves world
 position and perspective size. The background trees all share the same image.
-No depth buffer is used. Meshes use painter sorting and baked face colours;
-there is no per-frame lighting pass.
+The intersecting canopy clusters use per-pixel depth testing (`Z_BUFFERING=1`,
+`FAST_Z=0`). Average triangle-depth sorting cannot resolve their intersecting
+surfaces and produced visibly unstable foliage on S3. Opaque triangles are
+ordered front to back to reduce overdraw. Face colours are baked, so there is
+no per-frame lighting pass. The shared runtime allocates a 150 KiB depth buffer
+in PSRAM; the billboard path also retains depth testing for consistent occlusion.
 
 ## Image and transition tradeoffs
 
@@ -81,7 +85,8 @@ ctest --test-dir build-preview -C Release --output-on-failure
 ```
 
 Native checks verify actual rasterized triangle reductions at both LOD
-boundaries, billboard configuration, the reference path, buffer guards and
+boundaries, billboard configuration, the reference path, colour/depth buffer
+guards, opaque visibility under reversed triangle order and
 six serial/parallel image comparisons covering both field parities.
 `woodland.ppm` shows four LOD views and two reference views; preview performance
 counters are placeholders.

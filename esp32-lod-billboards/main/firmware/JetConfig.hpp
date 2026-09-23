@@ -9,15 +9,16 @@
 #define JET_S3_TRANSFORM_INTERNAL_BYTES 32768
 #define TILE_WIDTH 32
 #define TILE_HEIGHT 32
-#define FAST_Z 1
+#define FAST_Z 0
 #define LAZY_Z 0
 #define SCREEN_DOOR_ALPHA 0
 #define SKIP_ZERO_AREA_TRIANGLES 1
 #define NOISE_ALPHA 0
-// Distance LOD and billboard impostors use painter rendering, no depth buffer.
-#define Z_BUFFERING 0
+// Intersecting canopy ellipsoids require per-pixel depth testing.
+// Average triangle depth cannot correctly order their overlapping surfaces.
+#define Z_BUFFERING 1
 #define SORT_TRIANGLES 0
-#define JET_DEPTH_SORT_OPAQUE_FRONT_TO_BACK 0
+#define JET_DEPTH_SORT_OPAQUE_FRONT_TO_BACK 1
 #define SORT_SCENE_OBJECTS 0
 #define SORT_SCENE_REVERSE 0
 #define DEPTH_ALPHA_BLEND 0

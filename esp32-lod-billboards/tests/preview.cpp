@@ -8,11 +8,24 @@
 static void parallel(Renderer::Scene& s){std::vector<uint8_t>a(s.lastFrameDrawnTriangles),b(a.size());std::thread t([&]{s.rasterizeBand(159,320,b.data());});s.rasterizeBand(0,159,a.data());t.join();s.lastFrameRasterizedTriangles=0;for(size_t i=0;i<a.size();++i)s.lastFrameRasterizedTriangles+=!!(a[i]|b[i]);}
 int main(){
  constexpr int w=480,h=320,stride=w/2,count=stride*h/2;
- std::vector<uint16_t> pixels(count+32,0xbeef);Renderer::Scene scene(pixels.data(),nullptr,w,h);scene.getRenderer()->interlacedMode=true;Woodland::init(scene);PerformanceOverlay hud;hud.attach(scene,w);
- auto render=[&](float t,bool threaded){Woodland::time=t;Woodland::update(0);std::vector<uint16_t> out(w*h);for(int parity=0;parity<2;++parity){scene.frameCounter=parity;scene.render(threaded?parallel:nullptr);assert(std::all_of(pixels.begin()+count,pixels.end(),[](auto p){return p==0xbeef;}));for(int y=1-parity;y<h;y+=2)for(int x=0;x<w;++x)out[y*w+x]=pixels[(y/2)*stride+x/2];}auto sprites=scene.getSprites();std::stable_sort(sprites.begin(),sprites.end(),[](auto* a,auto* b){return a->zOrder<b->zOrder;});for(int y=0;y<h;++y)Renderer::compositeSprites(out.data()+y*w,w,y,sprites.data(),int(sprites.size()));return out;};
+ std::vector<uint16_t> pixels(count+32,0xbeef),depth(stride*h+32,0xd00d);Renderer::Scene scene(pixels.data(),depth.data(),w,h);scene.getRenderer()->interlacedMode=true;Woodland::init(scene);PerformanceOverlay hud;hud.attach(scene,w);
+ auto render=[&](float t,bool threaded){Woodland::time=t;Woodland::update(0);std::vector<uint16_t> out(w*h);for(int parity=0;parity<2;++parity){scene.frameCounter=parity;scene.render(threaded?parallel:nullptr);assert(std::all_of(pixels.begin()+count,pixels.end(),[](auto p){return p==0xbeef;}));assert(std::all_of(depth.begin()+stride*h,depth.end(),[](auto p){return p==0xd00d;}));for(int y=1-parity;y<h;y+=2)for(int x=0;x<w;++x)out[y*w+x]=pixels[(y/2)*stride+x/2];}auto sprites=scene.getSprites();std::stable_sort(sprites.begin(),sprites.end(),[](auto* a,auto* b){return a->zOrder<b->zOrder;});for(int y=0;y<h;++y)Renderer::compositeSprites(out.data()+y*w,w,y,sprites.data(),int(sprites.size()));return out;};
  std::vector<uint16_t> montage(w*h*6);const float times[]={0,3,4.55f,8,16,24};int tris[6];
  for(int pose=0;pose<6;++pose){auto out=render(times[pose],false);tris[pose]=scene.lastFrameRasterizedTriangles;assert(out==render(times[pose],true));std::printf("Pose %.2f: %d triangles; distance %d; stage %d\n",times[pose],tris[pose],Woodland::distance,Woodland::stage);for(int y=0;y<h;++y)std::copy(out.begin()+y*w,out.begin()+(y+1)*w,montage.begin()+((pose/2)*h+y)*w*2+(pose%2)*w);}
  assert(tris[0]>tris[1]*2);assert(tris[1]>tris[3]*2);assert(tris[5]>tris[3]+500);assert(tris[0]==tris[4]);
+ // Opaque canopy visibility should not depend on the source triangle order.
+ for(float t:{0.f,1.5f,3.f,16.f,19.f}) {
+  const auto normal=render(t,false);
+  std::reverse(Woodland::tree->triangles.begin(),Woodland::tree->triangles.end());
+  std::reverse(Woodland::simple->triangles.begin(),Woodland::simple->triangles.end());
+  const auto reversed=render(t,false);unsigned changed=0;
+  for(size_t i=0;i<normal.size();++i)changed+=normal[i]!=reversed[i];
+  std::printf("Depth order check %.1f: %u differing pixels\n",t,changed);
+  assert(changed<=512); // At most 256 half-width samples tie on shared/near-coplanar edges.
+  std::reverse(Woodland::tree->triangles.begin(),Woodland::tree->triangles.end());
+  std::reverse(Woodland::simple->triangles.begin(),Woodland::simple->triangles.end());
+ }
+ assert(std::any_of(depth.begin(),depth.begin()+stride*h,[](auto v){return v!=0&&v!=0xffff&&v!=0xd00d;}));
  assert(Woodland::impostor->isBillboard);assert(Woodland::impostor->triangles.size()==2);assert(Woodland::tree->lodMeshes[0]==Woodland::simple);
  // Test the exact engine distance boundaries with a level camera at the shared centre.
  auto check=[&](int distance){Woodland::time=0;Woodland::update(0);Woodland::camera.setPosition(0,280,-distance);Woodland::camera.lookAt({0,280,0});scene.frameCounter=0;scene.render();return scene.lastFrameRasterizedTriangles;};

@@ -69,9 +69,9 @@ Implemented: [Utah teapot lighting](esp32-lighting-teapot/README.md) and
 [Woodland mesh LOD and billboards](esp32-lod-billboards/README.md).
 Each showcase is reviewed on hardware before the next is started.
 
-Painter sorting is the default for the template cube, textured crate, island, neon car, Texture Lab, CRT / Arcade, Particle Lab, After Hours, Air Mail and Woodland.
-The lighting and cel teapots keep depth testing because its intersecting surfaces show
-visible sorting artefacts. The depth teapot explicitly demonstrates that tradeoff.
+Painter sorting is the default for the template cube, textured crate, island, neon car, Texture Lab, CRT / Arcade, Particle Lab, After Hours and Air Mail.
+The lighting and cel teapots and Woodland keep depth testing because their
+intersecting surfaces show visible sorting artefacts. The depth teapot explicitly demonstrates that tradeoff.
 
 ## Host checks
 
