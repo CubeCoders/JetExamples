@@ -127,3 +127,26 @@ Scanout remains 16.34-16.35 ms. No recovery yields or unexpected resets were see
 Startup free internal memory is 74,211 bytes; free PSRAM is 8,242,504 bytes.
 Current firmware size is 0x75c60 bytes. The nearest-window version remains on S3
 for visual review. Historical filtering measurements above used bilinear windows.
+
+
+## Unlit wheels (current configuration)
+
+All four wheel meshes now use textured UNLIT materials, with specular strength
+and exponent set to zero. The original OBJ's first wheel shares the body material;
+asset preparation rebinds only that object's `usemtl` to the existing identical
+second-wheel material. The original OBJ/MTL/image files remain unchanged.
+The combined mesh retains its painter ordering, geometry and UVs.
+
+Five native tests pass. The car preview additionally verifies exactly 200 Phong
+body triangles and 200 unlit wheel triangles, all with the same livery texture;
+window geometry, guard checks and parallel-band comparisons continue to pass.
+
+Built, flashed and measured over a full S3 orbit. After excluding the initial
+window, 20 reporting windows average **56.69 fields/s** and **17.36 ms**
+render time, with a range of **53.38-59.25 fields/s**. The preceding lit-wheel
+version averaged 55.92 fields/s. This is a modest gain and still falls short of
+sustained 60; separate moving-orbit captures are approximate comparisons.
+
+Scanout is 16.34-16.36 ms, with no recovery yields or unexpected resets observed.
+Startup internal/PSRAM free memory remains 74,211 / 8,242,504 bytes. Firmware size
+is 0x75cd0 bytes. This version remains running on S3 for visual review.

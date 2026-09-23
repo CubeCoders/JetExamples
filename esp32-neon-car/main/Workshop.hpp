@@ -122,8 +122,12 @@ inline void loadCar() {
    m->perspectiveCorrect=true;
    if(window<2)windows[window++]=extract(imported,m);
   } else {
-   m->shadingMode=ShadingMode::PHONG;m->diffuse=165;m->specular=205;
-   m->specularExponent=32;m->perspectiveCorrect=true;
+   const bool wheel=std::strcmp(m->name,"01_-_Default.004")==0 ||
+                    std::strcmp(m->name,"01_-_Default.005")==0 ||
+                    std::strcmp(m->name,"01_-_Default.006")==0;
+   m->shadingMode=wheel?ShadingMode::UNLIT:ShadingMode::PHONG;
+   m->diffuse=wheel?255:165;m->specular=wheel?0:205;
+   m->specularExponent=wheel?0:32;m->perspectiveCorrect=true;
    auto* part=extract(imported,m);
    const int base=int(car->vertices.size());
    for(const auto& v:part->vertices)car->addVertex(v);

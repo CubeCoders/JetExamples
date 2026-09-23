@@ -13,6 +13,18 @@ def rgb565(rgb):
 s='#pragma once\n#include <cstdint>\nnamespace Assets {\n'
 for name,ext in [('obj','obj'),('mtl','mtl')]:
  data=(r/'assets'/f'Nascar Intel - Separate Windows.{ext}').read_text()
+ if name=='obj':
+  # The first wheel shares the body material in the original export. Rebind
+  # only that object's faces to the identical existing second-wheel material
+  # so all four wheels can be unlit without changing the paint or source asset.
+  current_object='';lines=[]
+  for line in data.splitlines():
+   if line.startswith('o '):
+    current_object=line[2:]
+   elif current_object=='Nascar_wheel' and line.startswith('usemtl '):
+    line='usemtl 01_-_Default.004'
+   lines.append(line)
+  data='\n'.join(lines)+'\n'
  s+=f'inline const char {name}[] = R"JETASSET({data})JETASSET";\n'
 # Palette indices preserve a 256x256 livery in 64 KiB; all materials share it.
 im=Image.open(r/'assets/outrun.png').convert('RGB').transpose(Image.Transpose.FLIP_TOP_BOTTOM).resize((256,256),Image.Resampling.BOX)

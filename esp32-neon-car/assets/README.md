@@ -6,7 +6,10 @@ are retained unchanged here. They include the CubeCoders racing livery.
 No separate asset licence was supplied; the repository's code licence does not
 establish a licence for these model and livery files or their derived textures.
 
-`tools/prepare_assets.py` embeds the OBJ/MTL source text and converts the image to
+`tools/prepare_assets.py` embeds the OBJ/MTL text, rebinding the first wheel
+(`Nascar_wheel`) from the shared body material to the existing identical wheel
+material `01_-_Default.004`. This lets all wheels be unlit while retaining glossy
+body paint. The original source assets are unchanged. It converts the image to
 `livery-256.png`: vertically flipped for OBJ UV convention, resized to 256x256,
 then quantised to 256 colours without dithering. The generated firmware contains
 8-bit indices and an RGB565 palette. Model coordinates/normals are converted at

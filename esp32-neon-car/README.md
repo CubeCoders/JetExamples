@@ -7,9 +7,11 @@ four triangles for its separately authored front and rear windows.
 
 ## Rendering features
 
-- Textured Phong paint with a coloured ambient light, directional light and
+- Textured Phong body paint with a coloured ambient light, directional light and
   additive specular highlights (exponent 32). This creates a metallic appearance;
   it is not a physically based metal/roughness material.
+- All four wheels use the original livery texture unlit, with specular disabled.
+  The body has 200 Phong triangles; the wheels have 200 unlit triangles.
 - A shared 256x256, 256-colour livery: 64 KiB of indices plus a 512-byte RGB565
   palette. Palette textures use nearest sampling and perspective-correct UVs.
 - A 128x64 RGB565 workshop panorama with nearest sampling on the windows.
@@ -23,6 +25,10 @@ four triangles for its separately authored front and rear windows.
   painter sorting and no depth allocation. Background geometry is submitted
   before the sorted body and windows. This arrangement is tailored to the orbit;
   it is not a general solution for arbitrary intersecting models.
+
+The original export shares the body material with its first wheel. Asset
+preparation rebinds only that wheel to an existing, identical wheel material
+before embedding the OBJ. Source files, geometry and UVs remain unchanged.
 
 The original export's inward normals and mirrored coordinate system are
 converted in `loadCar`: reflect positions across X and negate the Y/Z normal
@@ -55,13 +61,14 @@ transform scratch. Immutable texture data stays in flash.
 
 Jet also detects exactly matching triangle normals in Phong/Gouraud and evaluates
 their lighting once per triangle. Phong keeps its additive specular highlight;
-Gouraud also requires matching cached vertex brightness. This model's 400 body
-and wheel triangles have constant normals, so all are eligible without changing
-materials. Smooth triangles keep their interpolating path. Fixed-point colour
+Gouraud also requires matching cached vertex brightness. This model's 200 Phong body
+triangles have constant normals, so they are eligible without changing materials;
+the 200 wheel triangles bypass lighting entirely. Smooth triangles keep their
+interpolating path. Fixed-point colour
 rounding can differ slightly from the original per-pixel normal interpolation.
 
-Measured S3 cadence with nearest-sampled windows is approximately 52-59 fields/s
-after startup (55.9 average), up from 45-52
+Measured S3 cadence with nearest-sampled windows and unlit wheels is approximately
+53-59 fields/s after startup (56.7 average), up from 45-52
 before the constant-normal shortcut and 25-28 before the earlier optimisations. See [the validation record](VALIDATION.md) for conditions and limits.
 
 ## Build and preview

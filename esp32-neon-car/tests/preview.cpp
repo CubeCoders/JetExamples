@@ -11,6 +11,18 @@ int main() {
  Workshop::init(scene);PerformanceOverlay stats;stats.attach(scene,w);
  assert(Workshop::car->triangles.size()+Workshop::windows[0]->triangles.size()+Workshop::windows[1]->triangles.size()==404);
  assert(Workshop::materials.size()==6);
+ unsigned paintTriangles=0,wheelTriangles=0;
+ for(const auto& t:Workshop::car->triangles) {
+  assert(t.material->diffuseMap==&Workshop::livery);
+  if(t.material->shadingMode==Renderer::ShadingMode::PHONG)++paintTriangles;
+  else {
+   assert(t.material->shadingMode==Renderer::ShadingMode::UNLIT);
+   assert(t.material->specular==0 && t.material->specularExponent==0);
+   ++wheelTriangles;
+  }
+ }
+ assert(paintTriangles==200 && wheelTriangles==200);
+
  std::vector<uint16_t> montage(w*h*4);
  unsigned changes=0;auto uv=Workshop::windows[0]->vertices[0].uv;
  for(int pose=0;pose<4;++pose) {
