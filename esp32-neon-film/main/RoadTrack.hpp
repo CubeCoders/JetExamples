@@ -7,7 +7,7 @@ struct RoadTrack {
  struct Item {Object* object;Vector3 origin;int center;};
  std::vector<Item> items;
  std::vector<Vector3> haloOrigins;
- int period=0;
+ int period=0,rearExtent=2400;
  void clear(){items.clear();haloOrigins.clear();period=0;}
  void capture(int length){
   clear();period=length;
@@ -18,9 +18,12 @@ struct RoadTrack {
   for(auto& g:glows)haloOrigins.push_back(g.position);
  }
  int offset(float travel,int center)const{
-  int distance=int(travel);return -distance+int(std::floor(float(distance-center+period-2000)/period))*period;
+  int distance=int(travel);return -distance+int(std::floor(float(distance-center+period-rearExtent)/period))*period;
  }
- void advance(float distance){
+ void advance(float distance,bool lookingBack=false){
+  // Reserve the long end of the recycled street for the direction of the shot.
+  // The extra 2400 units behind the rig keep nearby geometry clear of recycling.
+  rearExtent=lookingBack?period-2400:2400;
   for(auto& i:items)i.object->position=i.origin+Vector3{0,0,offset(distance,i.center)};
   for(size_t i=0;i<haloOrigins.size();++i)glows[i].position=haloOrigins[i]+Vector3{0,0,offset(distance,haloOrigins[i].z)};
  }

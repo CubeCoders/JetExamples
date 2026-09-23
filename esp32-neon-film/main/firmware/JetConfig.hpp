@@ -18,6 +18,8 @@
 // Authored cinematic geometry: painter rendering, per-object triangle sorting.
 #define Z_BUFFERING 0
 #define SORT_TRIANGLES 1
+// Keep near-field painter precision with the 9000-unit street draw distance.
+#define JET_SORT_DEPTH_BUCKETS 128
 #define JET_DEPTH_SORT_OPAQUE_FRONT_TO_BACK 0
 #define SORT_SCENE_OBJECTS 0
 #define SORT_SCENE_REVERSE 0

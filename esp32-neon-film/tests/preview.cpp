@@ -15,7 +15,7 @@ int main(){constexpr int w=480,h=320,stride=w/2,count=stride*h/2;
  auto black=render(Film::duration,true);for(int y=80;y<290;++y)for(int x=0;x<w;++x)assert(black[y*w+x]==0);assert(start==Film::duration);
  // Crossing every cut repeatedly must release scene-owned assets and preserve HUD.
  size_t firstObjects=0,firstMaterials=0,firstSprites=0;
- for(int pass=0;pass<3;++pass){start=0;for(int i=0;i<11;++i){Film::seek(start+.1f);assert(Film::shot==i);if(i==0){if(pass){assert(Film::bank.objects.size()==firstObjects&&Film::bank.materials.size()==firstMaterials&&scene.getSprites().size()==firstSprites);}firstObjects=Film::bank.objects.size();firstMaterials=Film::bank.materials.size();firstSprites=scene.getSprites().size();}start+=Film::durations[i];}}
+ for(int pass=0;pass<3;++pass){start=0;for(int i=0;i<11;++i){Film::seek(start+.1f);assert(Film::shot==i);if(i==0){assert(Film::bank.lodStorage.empty());if(pass){assert(Film::bank.objects.size()==firstObjects&&Film::bank.materials.size()==firstMaterials&&scene.getSprites().size()==firstSprites);}firstObjects=Film::bank.objects.size();firstMaterials=Film::bank.materials.size();firstSprites=scene.getSprites().size();}start+=Film::durations[i];}}
  for(float t:{16.f,27.f,36.f,43.f,51.f,60.f,71.f,85.f,96.f}){auto serial=render(t,false);assert(serial==render(t,true));}
  // Sweep the complete camera paths, including near-plane crossings between montage poses.
  for(int frame=0;frame<=2020;++frame){if(frame%100==0){std::printf("Sweep %.2f\n",frame/20.f);std::fflush(stdout);}auto pixels=render(frame/20.f,true);uint64_t hash=14695981039346656037ULL;for(auto pixel:pixels){hash^=pixel;hash*=1099511628211ULL;}digests<<frame<<" "<<hash<<"\n";}

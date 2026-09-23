@@ -13,7 +13,7 @@ inline void animateCity(float t){
  for(size_t i=0;i<holograms.size();++i){holograms[i]->position.y=1000+int(i)*110+int(24*std::sin(t*.7f+i));}
 }
 inline void glow(Vector3 p,int scale=2){auto* s=bank.sprite(bank.texture(&glowTex),0,0,10);s->blendMode=BlendMode::BLEND_ADD;s->textureFlags=Sprite2D::MIRROR_X|Sprite2D::MIRROR_Y;s->scale=scale;glows.push_back({p,s,scale});}
-inline void projectGlows(){for(auto& g:glows){auto v=camera.transformDirection(g.position-camera.position);auto* s=g.sprite;s->enabled=v.z>80;if(s->enabled){s->x=240+int(v.x*camera.fovFactor/v.z)-16*g.scale;s->y=160-int(v.y*camera.fovFactor/v.z)-16*g.scale;}}}
+inline void projectGlows(){for(auto& g:glows){auto v=camera.transformDirection(g.position-camera.position);auto* s=g.sprite;s->enabled=v.z>80 && v.z<camera.farPlane;if(s->enabled){s->x=240+int(v.x*camera.fovFactor/v.z)-16*g.scale;s->y=160-int(v.y*camera.fovFactor/v.z)-16*g.scale;}}}
 inline void building(int x,int z,int width,int depth,int height,int style,bool detail=true){
  auto* dark=bank.paint(style%2?0x19243B:0x25213C);
  auto* tower=bank.object();const int bevel=std::min(width,depth)/6;
@@ -44,13 +44,15 @@ inline void skyline(){
  water=bank.paint(0x102D4E,100,ShadingMode::WATER_REFLECT);water->specular=30;
  for(int x=-3;x<3;++x)for(int z=-2;z<2;++z)panel({x*2100,0,z*1800-1650},{(x+1)*2100,0,z*1800-1650},{(x+1)*2100,0,(z+1)*1800-1650},{x*2100,0,(z+1)*1800-1650},water,true);
 }
-inline void street(int halfWidth=320,int blocks=12,bool mirror=false){
+inline void street(int halfWidth=320,int blocks=12,bool mirror=false,int detailedBlocks=-1){
  const size_t first=bank.objects.size();
  auto* floor=bank.paint(0x141D2B);
- panel({-halfWidth-350,0,-2100},{halfWidth+350,0,-2100},{halfWidth+350,0,blocks*720+1500},{-halfWidth-350,0,blocks*720+1500},floor,true);
+ const int roadEnd=blocks*720+1500;
+ panel({-halfWidth-350,0,-roadEnd},{halfWidth+350,0,-roadEnd},{halfWidth+350,0,roadEnd},{-halfWidth-350,0,roadEnd},floor,true);
  auto* stripe=bank.paint(0x72808C);auto* trim=bank.paint(0x45D1D2);auto* pink=bank.paint(0xD94593);auto* curb=bank.paint(0x394353);auto* wallMat=bank.paint(0x1D2638);auto* awning=bank.paint(0x3D2749);auto* pipe=bank.paint(0x4C5667);
  Material* signsShared[6];for(int i=0;i<6;++i){signsShared[i]=bank.texture(&signs[i]);signsShared[i]->perspectiveCorrect=true;flicker.push_back(signsShared[i]);}
  Material* windows[4];Material* fronts[4];for(int i=0;i<4;++i){windows[i]=bank.texture(&facades[i]);fronts[i]=bank.texture(&shops[i]);}
+ Material* farWindows[4];for(int i=0;i<4;++i)farWindows[i]=bank.texture(&farFacades[i]);
  for(int i=0;i<blocks;++i){int z=i*720-700;
   if(halfWidth>500)for(int x:{-190,190})panel({x-3,2,z},{x+3,2,z},{x+3,2,z+210},{x-3,2,z+210},stripe,true);
   for(int side:{-1,1}){
@@ -61,6 +63,14 @@ inline void street(int halfWidth=320,int blocks=12,bool mirror=false){
    auto& tris=shell->triangles;tris.erase(std::remove_if(tris.begin(),tris.end(),[&](const auto& t){return shell->vertices[t.v1].position.x==-side*310 && shell->vertices[t.v2].position.x==-side*310 && shell->vertices[t.v3].position.x==-side*310;}),tris.end());
    const size_t artFirst=bank.objects.size();
    int faceX=side*(halfWidth+16),k=(i+(side>0?1:0))%4;
+   if(detailedBlocks>=0 && i>=detailedBlocks){
+    // The descending rain rig never approaches these blocks. Keep their
+    // skyline, lit facade and reflection without near-field shop furniture.
+    auto* facade=panel({faceX,16,z-300},{faceX,16,z+300},{faceX,h-40,z+300},{faceX,h-40,z-300},farWindows[k]);
+    if(side>0)for(auto& v:facade->vertices)v.uv.x=1024-v.uv.x;
+    panel({faceX-side,40,z-307},{faceX-side,40,z-300},{faceX-side,h-40,z-300},{faceX-side,h-40,z-307},i%2?pink:trim);
+    continue;
+   }
    panel({faceX,350,z-300},{faceX,350,z+300},{faceX,h-40,z+300},{faceX,h-40,z-300},windows[k]);
    panel({faceX,16,z-300},{faceX,16,z+300},{faceX,305,z+300},{faceX,305,z-300},fronts[k]);
    panel({side*halfWidth,8,z-340},{side*(halfWidth+100),8,z-340},{side*(halfWidth+100),8,z+340},{side*halfWidth,8,z+340},curb,true);
@@ -69,7 +79,7 @@ inline void street(int halfWidth=320,int blocks=12,bool mirror=false){
    panel({side*(halfWidth-59),303,z-309},{side*(halfWidth-59),303,z+309},{side*(halfWidth-59),297,z+309},{side*(halfWidth-59),297,z-309},i%2?pink:trim);
    auto* lamp=bank.object();lamp->isBillboard=true;lamp->setPosition(side*(halfWidth-18),0,z+280);
    quad(lamp,{-3,0,0},{3,0,0},{3,290,0},{-3,290,0},pipe);
-   quad(lamp,{-24,290,0},{24,290,0},{24,295,0},{-24,295,0},trim);bank.finish(lamp);
+   quad(lamp,{-24,290,0},{24,290,0},{24,295,0},{-24,295,0},trim);bank.finish(lamp);lamp->fadeNear=lamp->fadeFar=3000;
    auto* sm=signsShared[(i+(side>0?2:0))%6];
    int sx=side*(halfWidth-24);
    panel({sx,360,z-220},{sx,360,z+85},{sx,462,z+85},{sx,462,z-220},sm);
@@ -77,7 +87,17 @@ inline void street(int halfWidth=320,int blocks=12,bool mirror=false){
    panel({side*(halfWidth-4),480,z-316},{side*(halfWidth-4),480,z-309},{side*(halfWidth-4),950,z-309},{side*(halfWidth-4),950,z-316},i%2?pink:trim);
    if(side>0)for(size_t n=artFirst;n<bank.objects.size();++n){auto* art=bank.objects[n].get();if(art->triangles.empty()||!art->triangles[0].material->diffuseMap)continue;for(auto& v:art->vertices)v.uv.x=1024-v.uv.x;}
    if(!mirror){auto* wet=bank.paint(i%2?0xD0398C:0x309CA5,38);int wx=side*(halfWidth-100);panel({wx-20,2,z-210},{wx+20,2,z-210},{wx+10,2,z+240},{wx-10,2,z+240},wet,true);}
-   if(!mirror)batchStaticDetails(artFirst);
+   if(!mirror){
+    auto* head=batchStaticDetails(artFirst);
+    // Keep the same facade planes and colours at range; omit projecting
+    // shop furniture and use a filtered DRAM mip for the lit windows.
+    bank.lodStorage.emplace_back(new Object);auto* low=bank.lodStorage.back().get();
+    quad(low,{faceX,350,z-300},{faceX,350,z+300},{faceX,h-40,z+300},{faceX,h-40,z-300},farWindows[k]);
+    quad(low,{faceX,16,z-300},{faceX,16,z+300},{faceX,305,z+300},{faceX,305,z-300},fronts[k]);
+    quad(low,{faceX,299,z-309},{faceX,299,z+309},{faceX,305,z+309},{faceX,305,z-309},i%2?pink:trim);
+    if(side>0)for(auto& v:low->vertices)v.uv.x=1024-v.uv.x;
+    low->calculateBoundingBox();low->cachePositions();head->lodMeshes.push_back(low);
+   }
   }
   if(halfWidth<500 && i%3==1){
    // Two sloping suspended cables, safely above every ground-level rig.

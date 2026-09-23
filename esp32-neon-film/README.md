@@ -14,10 +14,10 @@ not used or bundled in this project.
 | --- | --- | --- |
 | 0–12 | River skyline, fade-in, searching sky beams, floating holograms | [01](references/cut-01.png) |
 | 12–22 | Descending camera in a rainy narrow street; mirrored shopfronts | [02](references/cut-02.png) |
-| 22–29 | Overhead courier and tyre spray | [03](references/cut-03.png) |
-| 29–38 | Tracking orbit across the front of the car | [04](references/cut-04.png) |
-| 38–47 | Driver-height autonomous cockpit, bonnet and red scanner | [05](references/cut-05.png) |
-| 47–53 | Instrument close-up: 70 to 88 MPH | [06](references/cut-06.png) |
+| 22–29 | Oblique overhead courier and tyre spray | [03](references/cut-03.png) |
+| 29–38 | Close three-quarter orbit around the front of the car | [04](references/cut-04.png) |
+| 38–47 | Angled driver-height cockpit, bonnet and red scanner | [05](references/cut-05.png) |
+| 47–53 | Oblique instrument close-up: 70 to 88 MPH | [06](references/cut-06.png) |
 | 53–64 | Right turn into a compact three-lane boulevard | [07](references/cut-07.png) |
 | 64–78 | Staged overtakes, pursuing police and four camera positions | [08](references/cut-08.png) |
 | 78–88 | Wheels slow and hinge downward; cyan hub glow builds | [09](references/cut-09.png) |
@@ -27,7 +27,27 @@ not used or bundled in this project.
 Camera translation is linear within each tracking shot; the front orbit uses
 constant angular progression. Smooth lane changes describe vehicle steering,
 not camera easing. The wheels provide the entire hover conversion: no wings
-or deployed rear engine. Road sections recycle around the tracking camera.
+or deployed rear engine. Road sections recycle around the tracking camera. The
+framing uses offset subjects and diagonal street lines, with a fixed lens per
+cut rather than a uniform centred composition.
+
+Street draw distance is 9,000 world units. Recycled streets provide sixteen
+blocks and put their longer extent in the viewing direction, including behind
+the car for front tracking. The fixed rain street uses simpler distant facades;
+the boulevard exit extends far enough to cover the complete driving path.
+Painter sorting uses 128 depth buckets to preserve nearby surface ordering at
+this range: still one byte per triangle, plus 512 bytes of sorting stack versus
+the default 64 buckets. Jet's default configuration remains unchanged.
+
+At 3,200 units, grouped storefronts switch to six-triangle alternatives that
+retain their shop artwork and facade planes. Four box-filtered 32×32 facade
+mipmaps occupy 8 KiB of internal DRAM; the cache is initialized once and remains
+immutable during rendering. Distant lamp meshes are culled separately.
+
+The colour grade increases contrast by 25% around an 80/255 pivot, deepening
+shadows and lifting highlights. It is applied to authored material colours and
+baked texture RGB565 values, with no per-pixel postprocess. Additive glow textures
+retain their original falloff.
 
 ## Rendering and memory
 

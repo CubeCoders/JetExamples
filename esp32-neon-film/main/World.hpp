@@ -14,22 +14,39 @@ inline Scene* scene=nullptr;
 inline Camera camera;
 inline DirectionalLight key({225,40,0},{180,220,255},255);
 inline AmbientLight ambient({115,104,155});
-inline uint16_t rgb(unsigned c){return uint16_t(((c>>19)&31)<<11|((c>>10)&63)<<5|((c>>3)&31));}
+// Grade authored colours once, before lighting/rasterization. Keep this curve
+// in sync with tools/prepare_assets.py; no full-screen postprocess is needed.
+inline int contrastChannel(int value){return std::clamp((value*5-80+2)/4,0,255);}
+inline uint16_t rgb(unsigned c){int r=contrastChannel((c>>16)&255),g=contrastChannel((c>>8)&255),b=contrastChannel(c&255);return uint16_t((r>>3)<<11|(g>>2)<<5|(b>>3));}
 inline float clamp(float t){return std::clamp(t,0.f,1.f);}
 inline Vector3 lerp(Vector3 a,Vector3 b,float t){return {int(a.x+(b.x-a.x)*t),int(a.y+(b.y-a.y)*t),int(a.z+(b.z-a.z)*t)};}
 inline Vector3 yawed(Vector3 p,float a){a*=pi/180;return {int(p.x*std::cos(a)+p.z*std::sin(a)),p.y,int(-p.x*std::sin(a)+p.z*std::cos(a))};}
 inline Texture facades[]={Texture(64,128,const_cast<uint16_t*>(Assets::facade0)),Texture(64,128,const_cast<uint16_t*>(Assets::facade1)),Texture(64,128,const_cast<uint16_t*>(Assets::facade2)),Texture(64,128,const_cast<uint16_t*>(Assets::facade3))};
+// Small filtered facade mipmaps live in internal BSS (8 KiB on ESP32).
+// Fill once before rendering, then treat them as immutable like the flash art.
+alignas(4) inline uint16_t farFacadePixels[4][32*32];
+inline Texture farFacades[]={Texture(32,32,farFacadePixels[0]),Texture(32,32,farFacadePixels[1]),Texture(32,32,farFacadePixels[2]),Texture(32,32,farFacadePixels[3])};
+inline void prepareFarFacades(){
+ static bool ready=false;if(ready)return;ready=true;
+ for(int k=0;k<4;++k)for(int y=0;y<32;++y)for(int x=0;x<32;++x){
+  int r=0,g=0,b=0;
+  for(int dy=0;dy<4;++dy)for(int dx=0;dx<2;++dx){uint16_t c=facades[k].data[(y*4+dy)*64+x*2+dx];r+=(c>>11)&31;g+=(c>>5)&63;b+=c&31;}
+  farFacadePixels[k][y*32+x]=uint16_t((r/8)<<11|(g/8)<<5|b/8);
+ }
+}
 inline Texture signs[]={Texture(128,64,const_cast<uint16_t*>(Assets::sign0)),Texture(128,64,const_cast<uint16_t*>(Assets::sign1)),Texture(128,64,const_cast<uint16_t*>(Assets::sign2)),Texture(128,64,const_cast<uint16_t*>(Assets::sign3)),Texture(128,64,const_cast<uint16_t*>(Assets::sign4)),Texture(128,64,const_cast<uint16_t*>(Assets::sign5))};
 inline Texture shops[]={Texture(128,64,const_cast<uint16_t*>(Assets::shop0)),Texture(128,64,const_cast<uint16_t*>(Assets::shop1)),Texture(128,64,const_cast<uint16_t*>(Assets::shop2)),Texture(128,64,const_cast<uint16_t*>(Assets::shop3))};
 inline Texture env(128,64,const_cast<uint16_t*>(Assets::environment)),holoTex(64,96,const_cast<uint16_t*>(Assets::hologram),true,0),dashTex(256,128,const_cast<uint16_t*>(Assets::dashboard));
 inline Texture glowTex(16,16,const_cast<uint16_t*>(Assets::glow),true,0);
-// All textures are immutable flash-backed objects. Scene-local meshes/materials
+// Texture data is immutable after setup: flash art plus the small DRAM mip cache.
+// Scene-local meshes/materials
 // can be released during update: scanout retains copies of sprite/material state.
 struct Bank {
  std::vector<std::unique_ptr<Object>> objects;
+ std::vector<std::unique_ptr<Object>> lodStorage;
  std::vector<std::unique_ptr<Material>> materials;
  std::vector<std::unique_ptr<Sprite2D>> sprites;
- void clear(){scene->getObjects().clear();auto& list=scene->getSprites();for(auto& s:sprites)list.erase(std::remove(list.begin(),list.end(),s.get()),list.end());sprites.clear();objects.clear();materials.clear();}
+ void clear(){scene->getObjects().clear();auto& list=scene->getSprites();for(auto& s:sprites)list.erase(std::remove(list.begin(),list.end(),s.get()),list.end());sprites.clear();objects.clear();lodStorage.clear();materials.clear();}
  Object* own(Object* o){objects.emplace_back(o);return o;}
  Material* paint(unsigned c,int alpha=255,ShadingMode mode=ShadingMode::UNLIT){materials.emplace_back(new Material(rgb(c)));auto* m=materials.back().get();m->alpha=uint8_t(alpha);m->shadingMode=mode;return m;}
  Material* texture(Texture* t,int alpha=255){auto* m=paint(0xffffff,alpha);m->diffuseMap=t;m->perspectiveCorrect=false;return m;}
@@ -46,7 +63,7 @@ inline Object* panel(Vector3 a,Vector3 b,Vector3 c,Vector3 d,Material* m,bool bg
 inline Object* disc(int x,int y,int z,int radius,Material* m,bool bg=false){auto* o=bank.object();o->addVertex({{x,y,z}});for(int i=0;i<16;++i){float a=i*2*pi/16;o->addVertex({{x+int(radius*std::cos(a)),y,z+int(radius*std::sin(a))}});}for(int i=0;i<16;++i)o->addTriangle(0,i+1,(i+1)%16+1,m);return bank.finish(o,bg);}
 // Combine adjacent static details into one transform/cull operation. Keep
 // billboard lamps and background floor layers separate. Materials are shared.
-inline void batchStaticDetails(size_t first){
+inline Object* batchStaticDetails(size_t first){
  auto* combined=new Object;combined->cullingMode=CullingMode::NO_CULLING;
  std::vector<Object*> removed;
  for(size_t i=first;i<bank.objects.size();++i){auto* source=bank.objects[i].get();if(source->isBillboard||source->noWriteZBuffer)continue;
@@ -57,7 +74,7 @@ inline void batchStaticDetails(size_t first){
  }
  auto& list=scene->getObjects();for(auto* dead:removed)list.erase(std::remove(list.begin(),list.end(),dead),list.end());
  bank.objects.erase(std::remove_if(bank.objects.begin()+first,bank.objects.end(),[&](const auto& o){return std::find(removed.begin(),removed.end(),o.get())!=removed.end();}),bank.objects.end());
- bank.finish(bank.own(combined));
+ return bank.finish(bank.own(combined));
 }
 inline Object* reflected(Object* source){auto* o=bank.own(new Object(*source));o->invalidatePositions();for(auto& v:o->vertices){v.position.y=-v.position.y;v.normal.y=-v.normal.y;}for(auto& t:o->triangles)std::swap(t.v2,t.v3);o->position.y=-o->position.y;return bank.finish(o,true);}
 inline void billboardGlow(Vector3 position,int size){auto* m=bank.texture(&glowTex);auto* s=bank.sprite(m,0,0,10);s->blendMode=BlendMode::BLEND_ADD;s->textureFlags=Sprite2D::MIRROR_X|Sprite2D::MIRROR_Y;s->scale=size;const auto v=camera.transformDirection(position-camera.position);if(v.z>40){s->x=240+int(v.x*camera.fovFactor/v.z)-16*size;s->y=160-int(v.y*camera.fovFactor/v.z)-16*size;}else s->enabled=false;}

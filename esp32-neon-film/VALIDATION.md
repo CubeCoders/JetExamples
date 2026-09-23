@@ -1,4 +1,4 @@
-# Validation — 23 September 2026
+# Validation — 24 September 2026
 
 The film is a work in progress, with visual review now conducted through
 native-rendered MP4s because the reviewer is remote. The 50 fields/s minimum
@@ -8,15 +8,16 @@ target is not yet met. Do not present the 60 fps export as a hardware benchmark.
 
 - ESP-IDF S3 build and COM6 flash; multiple full eleven-cut loops followed by
   the deliberate black-hold restart. No earlier reset in those captured runs.
-- Native six-test suite: complete film, offscreen clipping, unlit spans,
-  texture options, water reflection and minimal FPS overlay.
+- Native seven-test suite: complete film, offscreen clipping, unlit spans,
+  texture options, water reflection, extended painter buckets and minimal FPS overlay.
 - 2,021 timeline poses at 20 Hz, guarded packed field buffers, camera/building
   clearance and camera-to-car sightline checks, hero/traffic and police/traffic oriented-box
   overlap checks, clearance from camera rigs to vehicle bodies, three complete scene ownership cycles and black end fade.
 - Representative serial/parallel pixel comparisons; complete timeline hashes
   match when the new material span paths and unlit-normal shortcut are disabled.
 - Shared renderer regressions: car (5), lighting teapot (8), island (3) and
-  repository runtime/cube/overlay tests (5) passed.
+  repository runtime/cube/overlay tests (5) passed. The default-bucket runtime
+  tests (5) and depth-teapot/depth-sorting tests (6) were rerun after the bucket change.
 - 102-second RGB24-to-H.264 export: 6,120 decoded frames at 960×640, generated
   from the 480×320 field reconstruction without interpolation or motion blur.
 
@@ -48,9 +49,63 @@ and unattended yoke. Its native tests and all 2,021 optimized/reference timeline
 hashes pass; both the cockpit excerpt and full MP4 decode without errors.
 The hardware figures above predate this cabin geometry.
 
+The next camera pass uses oblique overhead/front-quarter views, an angled
+cockpit and gauge insert, offset chase compositions and a diagonal city overview.
+Street visibility then increases from 5,200 to 9,000 units. Recycled scenery
+extends in the shot's viewing direction; sixteen blocks cover forward and rear
+tracking. The rain street has seven detailed blocks plus seven distant facades.
+The right-turn boulevard now has 28 blocks to cover the entire car path.
+
+Extending the far plane initially exposed coarser painter ordering on the hood
+and instruments. Optional `JET_SORT_DEPTH_BUCKETS` retains the default 64 in Jet;
+this film uses 128, preserving finer near-field ordering without a depth buffer.
+The regression checks overlapping layers at a 9,000-unit far plane, draw-band
+priority and stable equal-depth ordering. The complete 2,021-pose optimized and
+reference hashes match with this revision, and the 102-second MP4 decodes cleanly.
+
 Painter sorting remains an authored-scene compromise: arbitrary new intersecting
 geometry may need subdivision, ordering changes or depth testing. Environment
 mapped glass approximates a distant city panorama, not live local reflections.
 Projected glow sprites do not perform general scene occlusion. The camera
 checks cover building volumes, vehicle envelopes and subject sightlines; they are not a complete
 collision system for every lamp, cable or awning.
+
+
+## Contrast and distant facade revision
+
+The final contrast pass grades procedural texture outputs and authored colours
+before rasterization, preserving the additive glow falloff. Distant storefronts
+use Jet's existing mesh LOD at 3,200 units, with the same shop artwork and reduced
+projecting detail. The four 32×32 filtered facade textures use 8 KiB of internal
+BSS (verified in the S3 link map). LOD meshes are owned separately from renderable
+scene objects and released at scene cuts; the ownership-cycle check verifies
+that no alternate meshes survive into the opening scene.
+
+All seven native tests and the 2,021 optimized/reference timeline hashes pass
+for this revision. Its complete 102-second H.264 export decodes without errors.
+
+
+### Latest S3 comparison
+
+The final contrast/LOD revision completed all eleven cuts and the intentional
+restart on COM6 without a captured panic or heap error. Mean sampled cadence
+compares the first extended-distance build against the LOD/contrast revision.
+These are serial window means, not per-frame minima; windows may straddle cuts.
+
+| Cut | Extended view | With LOD and contrast |
+| --- | ---: | ---: |
+| 01 THE RIVER | 51.3 | 51.4 |
+| 02 RAIN DISTRICT | 28.7 | 29.7 |
+| 03 THE COURIER | 49.1 | 52.4 |
+| 04 REAR VIEW | 31.4 | 38.2 |
+| 05 NO DRIVER | 30.5 | 34.6 |
+| 06 EIGHTY EIGHT | 57.9 | 59.6 |
+| 07 BOULEVARD | 43.8 | 48.8 |
+| 08 PURSUIT | 46.3 | 48.6 |
+| 09 FLIGHT MODE | 43.2 | 46.6 |
+| 10 IGNITION | 46.3 | 51.6 |
+| 11 ABOVE IT ALL | 43.0 | 42.0 |
+
+The extended view remains more expensive than the earlier short streets.
+The 50 fields/s minimum is still unmet, particularly in rain, cockpit and
+front tracking; the fixed-60 native video is solely a visual review artifact.

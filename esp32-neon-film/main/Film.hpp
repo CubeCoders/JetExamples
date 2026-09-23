@@ -44,6 +44,9 @@ inline void cockpit(){
  for(int i=0;i<12;++i)box(-210+i*39,95,-130,25,12,16,bank.paint(i%3==0?0xF5B73C:i%3==1?0x45D8C2:0xF85589));
  // The cabin shares the exterior's scale: 260 wide, 160 to the roof.
  for(size_t i=first;i<bank.objects.size();++i){auto* o=bank.objects[i].get();o->bakeScale(1,2);o->position=o->position.divide(2)+Vector3{0,-20,120};o->cachePositions();dashboardParts.push_back(o);}
+ // The gauge insert needs only its instrument binnacle. The surrounding
+ // cabin is built for the wider driver view.
+ if(shot==4){
  // Enclose the eye position with a real interior shell. The sloping
  // pillars and roof header frame the road; instruments sit inside this cabin.
  auto* roof=bank.paint(0x101928);auto* trim=bank.paint(0x344357);auto* bevel=bank.paint(0x586985);auto* cyan=bank.paint(0x399CBA);
@@ -71,6 +74,7 @@ inline void cockpit(){
  panel({-73,85,-35},{-17,85,-35},{-17,95,-27},{-73,95,-27},yoke);
  panel({-74,85,-35},{-65,90,-32},{-66,120,-23},{-79,120,-23},yoke);
  panel({-25,90,-32},{-16,85,-35},{-11,120,-23},{-24,120,-23},yoke);
+ }
  auto* bonnet=bank.paint(0x647DAA);
  panel({-97,111,121},{97,111,121},{108,73,285},{-108,73,285},bonnet);
 }
@@ -84,22 +88,24 @@ inline void load(int which){
  // live in PSRAM and is replaced as a unit at each hard cut.
  heap_caps_malloc_extmem_enable(128);
 #endif
- shot=which;
- camera.setFOV(62.f,480);camera.nearPlane=40;camera.farPlane=(which>=1&&which<=9)?5200:15000;
+ shot=which;prepareFarFacades();scene->lodScale=(which>=1&&which<=9)?3200:0;
+ // Fixed lenses per cut: wider inside the narrow lane, tighter on the wheel transformation.
+ constexpr float lenses[]={62,68,62,74,74,48,62,62,56,64,62};
+ camera.setFOV(lenses[which],480);camera.nearPlane=40;camera.farPlane=(which>=1&&which<=9)?9000:15000;
  for(int y=0;y<320;++y)sky[y]=rgb(((10+y*15/320)<<16)|((15+y*22/320)<<8)|(34+y*40/320));
  if(shot==0){skyline();}
- else if(shot==1){street(320,7,true);}
- else if(shot==2||shot==3){street(320,12,false);road.capture(8640);hero.build();}
- else if(shot==4||shot==5){if(shot==4){street(320,12,false);road.capture(8640);}cockpit();camera.setFOV(shot==4?68.f:48.f,480);}
+ else if(shot==1){street(320,14,true,7);}
+ else if(shot==2||shot==3){street(320,16,false);road.capture(11520);hero.build();}
+ else if(shot==4||shot==5){if(shot==4){street(320,16,false);road.capture(11520);}cockpit();}
  else if(shot==6){
   street(320,8,false);relocate(0,{0,0,-3500},0);
-  size_t first=bank.objects.size(),glowFirst=glows.size();boulevard(20);
+  size_t first=bank.objects.size(),glowFirst=glows.size();boulevard(28);
   for(size_t i=first;i<bank.objects.size();++i){auto* o=bank.objects[i].get();o->position=Vector3{1900,0,2100}+yawed(o->position,90);o->rotation.y+=90;}
   for(size_t i=glowFirst;i<glows.size();++i)glows[i].position=Vector3{1900,0,2100}+yawed(glows[i].position,90);
   hero.build();for(int i=0;i<6;++i)traffic[i].build(false,true,false,i);
  }
- else if(shot==7){boulevard();road.capture(8640);hero.build();for(int i=0;i<6;++i)traffic[i].build(false,true,false,i);for(auto& c:police)c.build(true,true);}
- else if(shot==8||shot==9){boulevard();road.capture(8640);hero.build(false,false,true);for(auto& c:police)c.build(true,true);}
+ else if(shot==7){boulevard(16);road.capture(11520);hero.build();for(int i=0;i<6;++i)traffic[i].build(false,true,false,i);for(auto& c:police)c.build(true,true);}
+ else if(shot==8||shot==9){boulevard(16);road.capture(11520);hero.build(false,false,true);for(auto& c:police)c.build(true,true);}
  else{cityGrid();}
  if(!hero.parts.empty()){heroGlow=int(glows.size());for(int i=0;i<6;++i)glow({0,0,0},i<2?1:2);}
 #if defined(ESP_PLATFORM) && defined(CONFIG_SPIRAM)
@@ -124,42 +130,42 @@ inline void pose(float p){
  if(shot==8){float braking=std::min(6.f,std::max(0.f,t-2));wheelTravel=1800*(std::min(t,2.f)+braking-braking*braking/12);}
  if(shot==9)wheelTravel=1800*5;
  wheelPhase=std::fmod(wheelTravel*180/(44*pi),360.f);
- if(shot==0){camera.setPosition(lerp({1700,440,-2200},{-1700,440,-2200},p));camera.lookAt(lerp({700,730,2400},{-700,730,2400},p));}
- if(shot==1){camera.setPosition(lerp({80,290,-850},{25,65,-100},p));camera.lookAt(lerp({0,170,2300},{0,65,2900},p));weather(t,false);}
- if(shot==2){road.advance(t*1900);car={0,0,0};camera.setPosition(lerp({185,800,-700},{215,700,-400},p));camera.lookAt({0,80,70});hero.pose(car,0);weather(t,true,car);}
- if(shot==3){road.advance(t*1900);car={0,0,0};float a=(-65+130*p)*pi/180;camera.setPosition({int(240*std::sin(a)),190,int(780*std::cos(a))});camera.lookAt({0,90,40});hero.pose(car,0);weather(t,true,car);}
+ if(shot==0){camera.setPosition(lerp({2300,410,-1900},{-1100,460,-2300},p));camera.lookAt(lerp({-300,700,2400},{600,760,2400},p));}
+ if(shot==1){camera.setPosition(lerp({-210,290,-900},{-150,65,-150},p));camera.lookAt(lerp({130,165,900},{170,70,1500},p));weather(t,false);}
+ if(shot==2){road.advance(t*1900);car={0,0,0};camera.setPosition(lerp({260,700,-590},{245,590,-530},p));camera.lookAt({-25,65,-45});hero.pose(car,0);weather(t,true,car);}
+ if(shot==3){road.advance(t*1900,true);car={45,0,0};float a=(-35+11*p)*pi/180;camera.setPosition(car+Vector3{int(520*std::sin(a)),int(145+20*p),int(520*std::cos(a))});camera.lookAt(car+lerp({35,95,-20},{20,100,-35},p));hero.pose(car,0);weather(t,true,car);}
  if(shot==4||shot==5){if(shot==4)road.advance(t*1900);
-  if(shot==4){camera.setPosition(lerp({0,136,-160},{0,136,-145},p));camera.lookAt({0,128,1300});speed(70);}
-  else{camera.setPosition(lerp({-61,75,-30},{-61,75,9},p));camera.lookAt({-61,75,86});speed(70+int(18*clamp(t/5.f)+.5f));}
+  if(shot==4){camera.setPosition(lerp({-46,132,-145},{-36,130,-130},p));camera.lookAt(lerp({50,112,560},{90,110,620},p));speed(70);}
+  else{camera.setPosition(lerp({-90,92,-25},{-82,88,8},p));camera.lookAt({-61,75,86});speed(70+int(18*clamp(t/5.f)+.5f));}
   for(size_t i=0;i<scanner.size();++i){float cursor=std::fmod(t*9,26.f);if(cursor>13)cursor=26-cursor;scanner[i]->color=rgb(std::abs(float(i)-cursor)<1.6f?0xFF403C:0x4A1727);}
  }
 
  if(shot==6){
-  if(t<3){car={0,0,int(-3400+4850*t/3)};yaw=0;camera.setPosition(car+Vector3{200,450,-1100});}
-  else if(t<5){float a=(t-3)*pi/4;car={int(650*(1-std::cos(a))),0,1450+int(650*std::sin(a))};yaw=(t-3)*45;camera.setPosition(lerp({-270,850,1600},{-270,900,2150},(t-3)/2));}
+  if(t<3){car={0,0,int(-3400+4850*t/3)};yaw=0;camera.setPosition(car+Vector3{-230,280,-680});}
+  else if(t<5){float a=(t-3)*pi/4;car={int(650*(1-std::cos(a))),0,1450+int(650*std::sin(a))};yaw=(t-3)*45;camera.setPosition(lerp({-270,650,1600},{-270,760,2150},(t-3)/2));}
   else{float q=t-5;auto lane=cornerLane(q);car={650+int(1900*q),0,2100-int(lanePosition(q,lane))};yaw=90+steeringYaw(laneVelocity(q,lane),1900);camera.setPosition({car.x+800,260,2620});}
-  camera.lookAt(car+Vector3{0,70,0});hero.pose(car,yaw);
+  camera.lookAt(car+(t<3?Vector3{80,100,160}:t<5?Vector3{60,100,100}:Vector3{120,100,-80}));hero.pose(car,yaw);
   const int lanes[]={-380,0,380,380,-380,-380};
   for(int i=0;i<6;++i)traffic[i].pose({2500+i*1600+int(800*(t-5)),0,2100-lanes[i]},90);
   weather(t,true,car);
  }
  if(shot==7){
-  road.advance(1800*t);auto lane=chaseLane(t);car={int(lanePosition(t,lane)),0,0};yaw=steeringYaw(laneVelocity(t,lane),1800);
+  road.advance(1800*t,t>=4&&t<7);auto lane=chaseLane(t);car={int(lanePosition(t,lane)),0,0};yaw=steeringYaw(laneVelocity(t,lane),1800);
   // Hard cuts between authored tracking rigs. Position changes are linear;
   // all rigs remain within the 1360-unit boulevard, clear of street furniture.
-  if(t<4)camera.setPosition(lerp({-140,265,-900},{-120,250,-780},t/4));
-  else if(t<7)camera.setPosition(lerp({555,180,820},{525,195,740},(t-4)/3));
-  else if(t<10)camera.setPosition(lerp({-555,250,-670},{-525,280,-560},(t-7)/3));
-  else camera.setPosition(lerp({200,1050,-650},{290,1200,-320},(t-10)/4));
-  camera.lookAt(car+Vector3{0,75,0});hero.pose(car,yaw);
+  if(t<4)camera.setPosition(lerp({240,280,-850},{280,265,-720},t/4));
+  else if(t<7)camera.setPosition(lerp({-515,245,700},{-475,235,590},(t-4)/3));
+  else if(t<10)camera.setPosition(lerp({-555,250,-580},{-525,270,-500},(t-7)/3));
+  else camera.setPosition(lerp({500,850,-450},{425,1100,-250},(t-10)/4));
+  camera.lookAt(car+(t<4?Vector3{-65,105,150}:t<7?Vector3{50,100,-80}:t<10?Vector3{40,95,90}:Vector3{-60,60,100}));hero.pose(car,yaw);
   const int starts[]={2300,6900,11500,5000,9500,15100},lanes[]={-380,0,380,380,-380,-380};
   for(int i=0;i<6;++i)traffic[i].pose({lanes[i],0,starts[i]-int(1150*t)},0);
   for(int i=0;i<2;++i){float delayed=t-(i?1.6f:.85f);auto chase=chaseLane(delayed);police[i].pose({int(lanePosition(delayed,chase))+(i?0:-40),0,i?-1750:-900},steeringYaw(laneVelocity(delayed,chase),1800),0,0,t);}
   weather(t,true,car);
  }
- if(shot==8){road.advance(t*1800);car={0,int(55*clamp((t-2)/6)),0};float h=clamp((t-2)/6);camera.setPosition(lerp({-510,145,-650},{-600,180,-700},p));camera.lookAt(car+Vector3{0,85,-50});hero.pose(car,0,h);for(int i=0;i<2;++i)police[i].pose({i?380:-380,0,-1000-i*500},0,0,0,t);}
- if(shot==9){road.advance(0);car={0,110+int(2900*clamp((t-.6f)/4.4f)),int(700*p)};camera.setPosition(lerp({-500,240,-1050},{-550,1200,-1200},p));camera.lookAt(lerp({0,100,0},{0,2700,500},p));hero.pose(car,0,1,1);for(int i=0;i<2;++i)police[i].pose({i?380:-380,0,-1000-i*500},0,0,0,.1f);weather(t,true,car);}
- if(shot==10){camera.setPosition(lerp({-1300,4100,-2300},{1100,5800,-3200},p));camera.lookAt({0,0,2200});}
+ if(shot==8){road.advance(t*1800);car={0,int(55*clamp((t-2)/6)),0};float h=clamp((t-2)/6);camera.setPosition(lerp({-510,145,-650},{-570,165,-570},p));camera.lookAt(car+Vector3{50,90,20});hero.pose(car,0,h);for(int i=0;i<2;++i)police[i].pose({i?380:-380,0,-1000-i*500},0,0,0,t);}
+ if(shot==9){road.advance(0);car={0,110+int(2900*clamp((t-.6f)/4.4f)),int(700*p)};camera.setPosition(lerp({-580,220,-800},{-580,1000,-950},p));camera.lookAt(lerp({-50,180,70},{200,2400,500},p));hero.pose(car,0,1,1);for(int i=0;i<2;++i)police[i].pose({i?380:-380,0,-1000-i*500},0,0,0,.1f);weather(t,true,car);}
+ if(shot==10){camera.setPosition(lerp({-3100,4000,-2500},{-1300,5600,-3400},p));camera.lookAt(lerp({900,100,2000},{300,0,2500},p));}
  animateCity(t);
  for(size_t i=0;i<flicker.size();++i){float v=std::fmod(t*11+i*3.7f,13.f);flicker[i]->alpha=uint8_t(v<.45f?70:255);}
  if(water){auto v=camera.transformDirection(Vector3{0,0,1900}-camera.position);int32_t cx,sx,cy,sy,cz,sz;camera.getRotationMatrix(cx,sx,cy,sy,cz,sz);int horizon=160+int(sx*camera.fovFactor/1024.f);float shore=160-v.y*camera.fovFactor/v.z;water->waterYBias=uint8_t(std::clamp(int(2*(shore-horizon)),0,255));water->waterReflectionMaxY=int16_t(shore);scene->waterTime=t;}

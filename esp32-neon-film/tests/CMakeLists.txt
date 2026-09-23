@@ -19,7 +19,7 @@ option(JET_REFERENCE_RASTER "Disable fast material spans for reference compariso
 if(JET_REFERENCE_RASTER)
  target_compile_definitions(Jet PRIVATE JET_FAST_SIMPLE_SPANS=0 JET_FAST_OPAQUE_UNLIT_SPANS=0 JET_SKIP_UNLIT_NORMALS=0)
 endif()
-foreach(test offscreen_clipping unlit_spans texture_options water_reflection)
+foreach(test offscreen_clipping unlit_spans texture_options water_reflection painter_buckets)
  add_executable(${test} ../../components/Jet/tests/${test}.cpp)
  target_link_libraries(${test} PRIVATE Jet)
  if(MSVC)
