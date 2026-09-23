@@ -52,4 +52,9 @@ FPS means render fields/second: each physical LCD row updates on alternate field
   engine texture changes. Final S3 build, flash and runtime verification pass.
 
 P4 defaults are included; this showcase has not been tested on P4 hardware.
-Final visual approval on S3 is pending before the next showcase begins.
+Approved on S3 before starting the tropical island showcase.
+
+Counter update: the overlay now includes mean render MS, and TRI/S is based
+on summed rendering time. Earlier throughput figures above used elapsed field
+time and remain historical measurements. The shared tests verify independence
+from frame pacing, weighted totals, sample resets and zero-duration safety.

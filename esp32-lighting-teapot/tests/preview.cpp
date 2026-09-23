@@ -13,14 +13,15 @@ int main() {
     Teapot::init(scene);
     PerformanceOverlay stats;
     stats.attach(scene,w);
-    stats.tick(1000,0);
-    for (int frame=1;frame<=30;++frame) stats.tick(1000+frame*20000,800);
-    assert(stats.fpsTenths()==500 && stats.triangles()==800 && stats.trianglesPerSecond()==40000);
+    stats.tick(1000,0,0);
+    for (int frame=1;frame<=30;++frame) stats.tick(1000+frame*20000,800,10000);
+    assert(stats.fpsTenths()==500 && stats.triangles()==800 && stats.trianglesPerSecond()==80000);
     PerformanceOverlay varying;
-    varying.tick(1000,0);
-    for(int frame=1;frame<=10;++frame) varying.tick(1000+frame*50000,frame*200);
+    varying.tick(1000,0,0);
+    for(int frame=1;frame<=10;++frame) varying.tick(1000+frame*50000,frame*200,frame*1000);
     assert(varying.fpsTenths()==200 && varying.triangles()==2000);
-    assert(varying.trianglesPerSecond()==22000); // Sum of actual fields, not FPS * latest count.
+    assert(varying.trianglesPerSecond()==200000); // Sum triangles / sum rendering microseconds.
+    assert(varying.renderMillisecondsTenths()==55);
     assert(Teapot::mesh->triangles.size()==1560);
     for (const auto& v : Teapot::mesh->vertices) {
         const auto n=v.normal;

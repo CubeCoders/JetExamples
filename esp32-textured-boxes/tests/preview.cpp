@@ -14,14 +14,15 @@ int main() {
     PerformanceOverlay display;
     display.attach(scene,w);
     PerformanceOverlay stats;
-    stats.tick(1000,0);
-    for (int frame=1;frame<=30;++frame) stats.tick(1000+frame*20000,800);
-    assert(stats.fpsTenths()==500 && stats.triangles()==800 && stats.trianglesPerSecond()==40000);
+    stats.tick(1000,0,0);
+    for (int frame=1;frame<=30;++frame) stats.tick(1000+frame*20000,800,10000);
+    assert(stats.fpsTenths()==500 && stats.triangles()==800 && stats.trianglesPerSecond()==80000);
     PerformanceOverlay varying;
-    varying.tick(1000,0);
-    for(int frame=1;frame<=10;++frame) varying.tick(1000+frame*50000,frame*200);
+    varying.tick(1000,0,0);
+    for(int frame=1;frame<=10;++frame) varying.tick(1000+frame*50000,frame*200,frame*1000);
     assert(varying.fpsTenths()==200 && varying.triangles()==2000);
-    assert(varying.trianglesPerSecond()==22000); // Sum of actual fields, not FPS * latest count.
+    assert(varying.trianglesPerSecond()==200000); // Sum triangles / sum rendering microseconds.
+    assert(varying.renderMillisecondsTenths()==55);
     assert(Boxes::box->triangles.size()==12);
     for(int i=0;i<4;++i) assert(Boxes::textures[i].bilinear==(i>=2));
     std::vector<uint16_t> montage(4*w*h), lit;

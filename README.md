@@ -37,14 +37,17 @@ The runtime preserves the game firmware's fast paths:
   portable RGB565 scanline compositing, including full-resolution overlays.
 
 This is 60 **fields** per second: each physical LCD row updates at 30 Hz.
-All examples display FPS, TRIS and TRI/S in a full-resolution overlay:
+All examples display FPS, MS, TRIS and TRI/S in a full-resolution overlay:
 - FPS is completed render fields per second, sampled over at least 0.5 seconds.
+- MS is mean elapsed `Scene::render` time, including setup and both raster workers,
+  excluding animation, sprite callbacks, scanout waits and frame pacing.
 - TRIS is the most recently completed field's unique rasterized triangle count
   after culling and clipping. It counts triangles accepted for rasterization,
   including fully depth-occluded triangles; it is not a visible-pixel query.
-- TRI/S sums those actual per-field counts over the same elapsed-time window,
-  rather than multiplying FPS by the model's total polygon count. Triangles
-  spanning both raster workers count once.
+- TRI/S divides the sum of rasterized triangle counts by the sum of measured render
+  times in the sample window. It is render throughput for this workload, not
+  display throughput or a maximum geometry benchmark. Triangles spanning both
+  raster workers count once.
 
 Serial timing reports describe cadence, rendering and scanout separately.
 The cube is deliberately small; it is not a renderer throughput benchmark.
@@ -53,7 +56,8 @@ The cube is deliberately small; it is not a renderer throughput benchmark.
 
 See [the S3 showcase series](SHOWCASES.md) for coverage and review progress.
 Implemented: [Utah teapot lighting](esp32-lighting-teapot/README.md) and
-[crate texture mapping/filtering](esp32-textured-boxes/README.md).
+[crate texture mapping/filtering](esp32-textured-boxes/README.md), and
+[the tropical island](esp32-tropical-island/README.md).
 Each showcase is reviewed on hardware before the next is started.
 
 ## Host checks

@@ -68,3 +68,8 @@ brighter gradient, cycle and additional optimisations were subsequently approved
 
 P4 wiring/defaults are provided; this showcase has not been hardware-tested on P4.
 This showcase was approved on hardware before work began on the texture example.
+
+Counter update: the overlay now includes mean render MS, and TRI/S is based
+on summed rendering time. Earlier throughput figures above used elapsed field
+time and remain historical measurements. The shared tests verify independence
+from frame pacing, weighted totals, sample resets and zero-duration safety.

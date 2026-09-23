@@ -62,3 +62,7 @@ The preview writes `boxes.ppm` with all four modes at the same pose. Its FPS
 overlay deliberately remains unmeasured; hardware measurements come from the S3.
 Tests cover mode timing, guard pixels, mapping/filter choices and analytic UV
 reference samples. [Validation record](VALIDATION.md).
+
+The shared overlay shows field FPS, mean render MS, TRIS and render-time TRI/S.
+TRI/S uses summed triangle counts divided by summed render time, excluding
+scanout waits and pacing; MS includes scene setup and both raster workers.

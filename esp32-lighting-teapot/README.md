@@ -52,3 +52,7 @@ Six checks cover four glossy preview poses (`teapot.ppm`), normal lengths,
 mode timing, lighting response, counter math, depth addressing, integer square
 roots, specular accuracy, blended depth sorting, buffer guards and concurrent
 raster equivalence. The final red cycling showcase was approved on the S3.
+
+The shared overlay shows field FPS, mean render MS, TRIS and render-time TRI/S.
+TRI/S uses summed triangle counts divided by summed render time, excluding
+scanout waits and pacing; MS includes scene setup and both raster workers.

@@ -22,6 +22,7 @@ namespace {
 Renderer::Scene* scene = nullptr;
 Init initScene = nullptr;
 Update updateScene = nullptr;
+Update afterRenderScene = nullptr;
 Renderer::Scene::RasterExecutor executor = nullptr;
 TaskHandle_t renderTask = nullptr;
 SemaphoreHandle_t renderDone = nullptr;
@@ -69,6 +70,7 @@ void render(void*) {
         scene->setFramebuffer(renderBuffer);
         scene->render(measuredRaster);
         renderUs = esp_timer_get_time() - start;
+        if (afterRenderScene) afterRenderScene(elapsed);
         xSemaphoreGive(renderDone);
     }
 }
@@ -112,7 +114,7 @@ void run(void*) {
             ++intervals;
         }
         previousStart = start;
-        stats.tick(start, unsigned(scene->lastFrameRasterizedTriangles));
+        stats.tick(start, unsigned(scene->lastFrameRasterizedTriangles), renderUs);
         const auto frame = Display::beginFrame();
         renderBuffer = frame.renderBuffer;
         // Previous-field reads are immutable even while both cores rasterize.
@@ -128,7 +130,7 @@ void run(void*) {
         renderSum += renderUs;
         rasterSum += rasterUs;
         if (++samples == 60) {
-            std::printf("Cadence %.2f fields/s; render %.2f ms (setup %.2f, raster %.2f), scanout %.2f ms; %u tris, %u tris/s; idle recovery %u\n",
+            std::printf("Cadence %.2f fields/s; render %.2f ms (setup %.2f, raster %.2f), scanout %.2f ms; %u tris, %u render tris/s; idle recovery %u\n",
                 intervals * 1000000.0 / intervalSum,
                 renderSum / 60000.0, (renderSum-rasterSum) / 60000.0, rasterSum / 60000.0, scanoutSum / 60000.0, stats.triangles(), stats.trianglesPerSecond(), pacer.idleRecoveryYields);
             intervalSum = renderSum = scanoutSum = rasterSum = 0;
@@ -139,10 +141,11 @@ void run(void*) {
 }
 }
 
-void start(Init init, Update update) {
+void start(Init init, Update update, Update afterRender) {
     configASSERT(init && !initScene);
     initScene = init;
     updateScene = update;
+    afterRenderScene = afterRender;
     const BaseType_t created = xTaskCreatePinnedToCore(run, "JetFrame", 8192,
                                                        nullptr, 2, nullptr, 0);
     configASSERT(created == pdPASS);
