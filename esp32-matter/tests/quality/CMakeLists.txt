@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.16)
+project(matter_quality LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+add_subdirectory(../../../components/Jet/src Jet)
+target_include_directories(Jet PUBLIC .)
+add_executable(matter_quality quality.cpp)
+target_include_directories(matter_quality PRIVATE ../../main)
+target_link_libraries(matter_quality PRIVATE Jet)

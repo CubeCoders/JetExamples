@@ -38,7 +38,8 @@ The runtime preserves the game firmware's fast paths:
 
 This is 60 **fields** per second: each physical LCD row updates at 30 Hz.
 Feature examples display FPS, MS, TRIS and TRI/S in a full-resolution overlay.
-The cinematic `esp32-neon-film` deliberately shows only rounded FPS at top-right:
+The cinematic `esp32-neon-film` and abstract exhibition `esp32-matter`
+deliberately show only rounded FPS at top-right:
 
 - FPS is completed render fields per second, sampled over at least 0.5 seconds.
 - MS is mean elapsed `Scene::render` time, including setup, both raster workers and any registered RenderEffects callback,
@@ -57,6 +58,9 @@ The cube is deliberately small; it is not a renderer throughput benchmark.
 ## Showcases
 
 See [the S3 showcase series](SHOWCASES.md) for coverage and review progress.
+[MATTER, a three-minute procedural art exhibition](esp32-matter/README.md) is
+available alongside the cinematic ESP 88.
+
 Implemented: [Utah teapot lighting](esp32-lighting-teapot/README.md) and
 [crate texture mapping/filtering](esp32-textured-boxes/README.md), and
 [the tropical island](esp32-tropical-island/README.md), and
