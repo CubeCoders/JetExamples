@@ -43,7 +43,17 @@ inline constexpr float roadSpeed=speedFromMph(70),chaseSpeed=speedFromMph(88);
 inline constexpr float climbSpeed=650,climbRamp=.8f;
 inline float launchHeight(float t){return 55+climbSpeed*(t<climbRamp?t*t/(2*climbRamp):t-climbRamp/2);}
 inline float launchPitch(float t){return std::atan2(climbSpeed*clamp(t/climbRamp),chaseSpeed)*180/pi;}
-inline constexpr float turnStart=2,turnEnd=3.15f,turnRadius=1030;
+inline constexpr float turnStart=2,turnEnd=3.2f,turnRadius=1030;
+inline constexpr float exitTrackingStart=turnEnd+1.05f;
+inline constexpr float cornerSpeed=turnRadius*pi/(2*(turnEnd-turnStart));
+inline constexpr float brakeStart=.55f,brakeSeconds=1.1f,exitAccelerationSeconds=1.8f;
+inline float approachTravel(float t){
+ float u=std::clamp(t-brakeStart,0.f,brakeSeconds);
+ return chaseSpeed*std::min(t,brakeStart)+chaseSpeed*u-(chaseSpeed-cornerSpeed)*u*u/(2*brakeSeconds)+cornerSpeed*std::max(0.f,t-brakeStart-brakeSeconds);
+}
+inline float exitTravel(float t){float u=std::min(t,exitAccelerationSeconds);return cornerSpeed*u+(chaseSpeed-cornerSpeed)*u*u/(2*exitAccelerationSeconds)+chaseSpeed*std::max(0.f,t-exitAccelerationSeconds);}
+inline float exitSpeed(float t){return cornerSpeed+(chaseSpeed-cornerSpeed)*clamp(t/exitAccelerationSeconds);}
+
 struct LaneChange {float from,to,start,seconds;};
 // Easing here describes steering, not camera motion. The derivative drives
 // the body's yaw, keeping the wheels and nose aligned with its actual velocity.
@@ -54,10 +64,6 @@ inline LaneChange chaseLane(float t){
  if(t<8.2f)return {0,380,4.5f,1.4f};
  return {380,0,8.2f,1.4f};
 }
-inline LaneChange cornerLane(float t){
- if(t<1.8f)return {-380,0,.25f,1.15f};
- if(t<3.8f)return {0,380,1.8f,1.f};
- return {380,0,3.8f,.85f};
-}
+inline LaneChange cornerLane(float t){return {-380,0,2.2f,1.f};}
 inline float steeringYaw(float lateral,float forward){return std::atan2(lateral,forward)*180/pi;}
 }

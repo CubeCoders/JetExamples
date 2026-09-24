@@ -62,6 +62,39 @@ struct Bank {
 inline Bank bank;
 inline std::vector<Object*> architecture;
 inline void quad(Object* o,Vector3 a,Vector3 b,Vector3 c,Vector3 d,Material* m){int n=int(o->vertices.size());o->addVertex({a,{0,0},{0,1024,0}});o->addVertex({b,{1024,0},{0,1024,0}});o->addVertex({c,{1024,1024},{0,1024,0}});o->addVertex({d,{0,1024},{0,1024,0}});o->addFace(n,n+1,n+2,n+3,m);}
+// Luminous tubes keep a minimum projected footprint in packed half-width
+// fields. They remain depth-sorted geometry; these are not overlay sprites.
+struct NeonStroke {Object* mesh;int vertex;Vector3 a,b;float width;};
+inline std::vector<NeonStroke> neonStrokes;
+inline Object* neonLine(Vector3 a,Vector3 b,Material* material,float width=7){
+ auto* o=bank.object();quad(o,a+Vector3{-4,0,0},a+Vector3{4,0,0},b+Vector3{4,0,0},b+Vector3{-4,0,0},material);
+ neonStrokes.push_back({o,0,a,b,width});return bank.finish(o);
+}
+inline void prepareNeon(){
+ std::vector<Object*> prepared;
+ for(auto& stroke:neonStrokes){auto* o=stroke.mesh;if(std::find(prepared.begin(),prepared.end(),o)!=prepared.end())continue;
+  prepared.push_back(o);o->invalidatePositions();o->boundingBoxMin=o->boundingBoxMin-Vector3{256,256,256};o->boundingBoxMax=o->boundingBoxMax+Vector3{256,256,256};
+ }
+}
+inline void animateNeon(){
+ int32_t cx,sx,cy,sy,cz,sz;camera.getRotationMatrix(cx,sx,cy,sy,cz,sz);
+ auto fromView=[&](float x,float y,float length){
+  float xx=(x*cz+y*sz)/1024,yy=(-x*sz+y*cz)/1024;
+  float wy=yy*cx/1024,wz=-yy*sx/1024;
+  return Vector3{int(std::round((xx*cy-wz*sy)*length/1024)),int(std::round(wy*length)),int(std::round((xx*sy+wz*cy)*length/1024))};
+ };
+ for(auto& stroke:neonStrokes){auto* o=stroke.mesh;auto a=camera.transformDirection(o->position+yawed(stroke.a,o->rotation.y)-camera.position),b=camera.transformDirection(o->position+yawed(stroke.b,o->rotation.y)-camera.position);
+  float az=float(std::max(a.z,camera.nearPlane)),bz=float(std::max(b.z,camera.nearPlane));float dx=b.x/bz-a.x/az,dy=b.y/bz-a.y/az,length=std::sqrt(dx*dx+dy*dy);
+  if(length<.00001f)continue;
+  float nx=-dy/length,ny=dx/length;
+  // 3 output pixels leaves room for integer transform/projection rounding;
+  // at least one packed sample covers each scanline of a vertical tube.
+  auto offset=[&](float z){return yawed(fromView(nx,ny,std::max(stroke.width/2,1.5f*renderScale*z/camera.fovFactor)),-o->rotation.y);};
+  auto aa=offset(az),bb=offset(bz);int n=stroke.vertex;
+  o->vertices[n].position=stroke.a-aa;o->vertices[n+1].position=stroke.a+aa;
+  o->vertices[n+2].position=stroke.b+bb;o->vertices[n+3].position=stroke.b-bb;
+ }
+}
 inline Object* box(int x,int y,int z,int w,int h,int d,Material* m,bool bg=false){auto* o=bank.own(Primitives::createCube(w,h,d,m));o->setPosition(x,y,z);return bank.finish(o,bg);}
 inline Object* wall(int x,int y,int z,int w,int h,int d,Material* m){auto* o=box(x,y,z,w,h,d,m);architecture.push_back(o);return o;}
 inline Object* panel(Vector3 a,Vector3 b,Vector3 c,Vector3 d,Material* m,bool bg=false){auto* o=bank.object();quad(o,a,b,c,d,m);return bank.finish(o,bg);}
@@ -75,12 +108,13 @@ inline Object* batchStaticDetails(size_t first){
   uint16_t base=uint16_t(combined->vertices.size());
   for(auto v:source->vertices){v.position=v.position+source->position;combined->addVertex(v);}
   for(auto t:source->triangles)combined->addTriangle(base+t.v1,base+t.v2,base+t.v3,t.material);
+  for(auto& stroke:neonStrokes)if(stroke.mesh==source){stroke.mesh=combined;stroke.vertex+=base;stroke.a=stroke.a+source->position;stroke.b=stroke.b+source->position;}
   removed.push_back(source);
  }
  auto& list=scene->getObjects();for(auto* dead:removed)list.erase(std::remove(list.begin(),list.end(),dead),list.end());
  bank.objects.erase(std::remove_if(bank.objects.begin()+first,bank.objects.end(),[&](const auto& o){return std::find(removed.begin(),removed.end(),o.get())!=removed.end();}),bank.objects.end());
  return bank.finish(bank.own(combined));
 }
-inline Object* reflected(Object* source){auto* o=bank.own(new Object(*source));o->invalidatePositions();for(auto& v:o->vertices){v.position.y=-v.position.y;v.normal.y=-v.normal.y;}for(auto& t:o->triangles)std::swap(t.v2,t.v3);o->position.y=-o->position.y;return bank.finish(o,true);}
+inline Object* reflected(Object* source){auto* o=bank.own(new Object(*source));o->invalidatePositions();for(auto& v:o->vertices){v.position.y=-v.position.y;v.normal.y=-v.normal.y;}for(auto& t:o->triangles)std::swap(t.v2,t.v3);o->position.y=-o->position.y;size_t count=neonStrokes.size();for(size_t i=0;i<count;++i)if(neonStrokes[i].mesh==source){auto copy=neonStrokes[i];copy.mesh=o;copy.a.y=-copy.a.y;copy.b.y=-copy.b.y;neonStrokes.push_back(copy);}return bank.finish(o,true);}
 inline void billboardGlow(Vector3 position,int size){auto* m=bank.texture(&glowTex);auto* s=bank.sprite(m,0,0,10);s->blendMode=BlendMode::BLEND_ADD;s->textureFlags=Sprite2D::MIRROR_X|Sprite2D::MIRROR_Y;s->scale=size*renderScale;const auto v=camera.transformDirection(position-camera.position);if(v.z>40){s->x=renderWidth/2+int(v.x*camera.fovFactor/v.z)-16*size*renderScale;s->y=renderHeight/2-int(v.y*camera.fovFactor/v.z)-16*size*renderScale;}else s->enabled=false;}
 }

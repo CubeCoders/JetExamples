@@ -1,6 +1,6 @@
-# ION — neon city film
+# ESP 88 — a demo by CubeCoders
 
-A 101-second, eleven-shot Jet cinematic, followed by a one-second black hold
+A 116-second, twelve-scene Jet cinematic, followed by a one-second black hold
 and an intentional ESP32 restart. This example is being reviewed and tuned;
 the 50–60 fields/s performance target is not yet met throughout.
 
@@ -18,11 +18,12 @@ not used or bundled in this project.
 | 29–38 | Close three-quarter orbit around the front of the car | [04](references/cut-04.png) |
 | 38–47 | Angled driver-height cockpit, bonnet and red scanner | [05](references/cut-05.png) |
 | 47–53 | Oblique instrument close-up: 70 to 88 MPH | [06](references/cut-06.png) |
-| 53–64 | Right turn into a compact three-lane boulevard | [07](references/cut-07.png) |
-| 64–78 | Staged overtakes, pursuing police and four camera positions | [08](references/cut-08.png) |
+| 53–64 | Hard braking, faster sideways skid, close pass-by, then tracking in traffic | [07](references/cut-07.png) |
+| 64–78 | Police close from established distant positions, overtakes and camera cuts | [08](references/cut-08.png) |
 | 78–88 | Wheels slow and hinge downward; cyan hub glow builds | [09](references/cut-09.png) |
 | 88–93 | Pitched climb, forward flight and frozen police | [10](references/cut-10.png) |
-| 93–101 | Ascending fly-by, city overview and fade-out | [11](references/cut-11.png) |
+| 93–101 | Lower fly-by over the city, fade to black | [11](references/cut-11.png) |
+| 101–116 | Waterfront pan, closing credits and shared fade to black | [01](references/cut-01.png) |
 
 Camera translation is linear within each tracking shot; the front orbit uses
 constant angular progression. Smooth lane changes describe vehicle steering,
@@ -31,7 +32,11 @@ or deployed rear engine. The launch has no flash: the car retains its forward
 speed of 88 MPH while climbing at 650 world units/s. Its nose follows the
 flight direction, including the hinged wheels, window reflections and glow sprites. The final camera
 waits ahead of its flight path, letting the coupe pass close to the lens before
-tilting down over the city and fading out. Road sections recycle around the tracking camera. The
+tilting down over the city. After the fly-by fades to black, the original
+waterfront composition returns with its linear pan. It fades in over two seconds;
+the credits appear from 103–105 seconds, remain fully visible for eight seconds,
+then fade with the scene from 113–116 seconds.
+Road sections recycle around the tracking camera. The
 framing uses offset subjects and diagonal street lines, with lenses chosen per cut. Linear field-of-view changes tighten
 the 70–88 MPH gauge insert from 62° to 46°, widen the launch from 54° to 70°,
 and pull the final approach from 34° to 68° before the car passes the lens.
@@ -65,16 +70,26 @@ retain their original falloff.
 - Shared ESP32 runtime: 480×320 output, half-width RGB565, alternating fields,
   overlapped DMA scanout and two raster workers on the S3. At 60 fields/s an
   individual physical LCD row refreshes at 30 Hz.
-- Painter sorting without a depth allocation. Opaque Phong body, unlit tyres
+- Painter sorting without a depth allocation, with exact mean-depth refinement
+  inside buckets touched by vehicle meshes. Opaque Phong body, unlit tyres
   and scenery, nearest environment mapping on the separately modelled canopy.
 - Previous-field river reflection; inverted mesh reflections under the rainy
   street; translucent additive beams and full-resolution sprite halos.
 - Bevelled/sloping skyline, shop textures, sloped awnings, projecting signs,
-  spinning wheels, flickering lamps and fine low-opacity rain streaks.
+  spinning wheels, flickering lamps and fast rain streaks in every exterior shot.
+  The narrow street also has short, independently scattered road splashes;
+  interiors remain dry.
 - Scene-local geometry/materials are owned by a bank and released at cuts.
   Persistent immutable textures remain valid for concurrent scanout snapshots.
   Large scene allocations prefer PSRAM; internal RAM is reserved for live
   transforms and runtime work. Adjacent shop details share transform work.
+- Neon tubes widen to maintain at least two projected pixels in the slow skyline
+  pan. The same ribbon treatment covers shop trims and city ground lines; far
+  shop LOD uses broader trim bands. Searchlights have brighter core beams and
+  wider, faster sweeps. Fine texture details can still alias.
+- Closed traffic wheel wells and a recessed chassis floor prevent the body from
+  intersecting the wheels. Suspension pitches/rolls the hero body while its road
+  wheels stay planted.
 - Closed hero body, shared canopy/glass boundaries, inner wheel-well walls,
   a continuous chassis floor and capped wheels that remain sealed in hover mode.
 - Enclosed cockpit with sloping windscreen pillars, roof header and door trim.
@@ -140,7 +155,15 @@ For multi-configuration generators, also pass `--renderer` with the executable
 under `build-quality/Release`. Both export modes write render and encoding logs
 next to the MP4. The quality build enables Jet's optional
 `JET_HIGH_PRECISION_UVS`: large projected triangles use full-width edge weights
-and double reciprocal depths to prevent texture overflow. The embedded path
-keeps the option disabled and pays no added pixel cost.
+and double reciprocal depths to prevent texture overflow. The quality build also
+enables `JET_PERSPECTIVE_DEPTH`, interpolating reciprocal
+Z so large sloping panels occlude correctly. Both options remain disabled on S3
+and add no firmware pixel cost.
+
+The checked-in `main/CreditMask.hpp` contains the closing typography at native
+and desktop resolution. It needs no runtime font library. To replace its typeface,
+run `python tools/prepare_credits.py --font regular.ttf --bold-font bold.ttf`.
+The embedded mask occupies 7,560 flash bytes and expands into approximately
+118 KiB of PSRAM only in the final scene.
 
 See [VALIDATION.md](VALIDATION.md) for checks and known limitations.

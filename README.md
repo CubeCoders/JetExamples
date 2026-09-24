@@ -69,7 +69,7 @@ Implemented: [Utah teapot lighting](esp32-lighting-teapot/README.md) and
 [After Hours blending tricks](esp32-sprites-blending/README.md), and
 [Air Mail sprite controls](esp32-sprite-controls/README.md), and
 [Woodland mesh LOD and billboards](esp32-lod-billboards/README.md), and
-[ION, the eleven-shot cinematic](esp32-neon-film/README.md) (in review).
+[ESP 88, the twelve-scene cinematic](esp32-neon-film/README.md) (in review).
 Each showcase is reviewed on hardware before the next is started.
 
 Painter sorting is the default for the template cube, textured crate, island, neon car, Texture Lab, CRT / Arcade, Particle Lab, After Hours, Air Mail and Woodland.

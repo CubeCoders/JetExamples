@@ -7,7 +7,7 @@ p.add_argument('--ffmpeg',default='ffmpeg')
 p.add_argument('--renderer',type=Path,default=None)
 p.add_argument('--quality',action='store_true',help='Use the full-frame 2880x1920 renderer and downsample to 1920x1280')
 p.add_argument('--start',type=float,default=0)
-p.add_argument('--seconds',type=float,default=102)
+p.add_argument('--seconds',type=float,default=117)
 a=p.parse_args();a.output.parent.mkdir(parents=True,exist_ok=True)
 if a.renderer is None:
  a.renderer=Path(__file__).resolve().parents[1]/(('build-quality/film_quality' if a.quality else 'build-preview/film_video')+('.exe' if os.name=='nt' else ''))

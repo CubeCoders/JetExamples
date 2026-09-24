@@ -8,12 +8,13 @@ struct CarPart {Object* object;Vector3 local;int kind;};
 struct Vehicle {
  std::vector<CarPart> parts;
  Material *metal=nullptr,*wheelGlow=nullptr;
- Vector3 position;float heading=0;int bodyPitch=0;
+ Vector3 position;float heading=0;int bodyPitch=0,bodyRoll=0;bool suspension=false;
  // Positive pitch raises the nose. Jet's X rotation uses the opposite sign.
- Vector3 direction(Vector3 v)const{float a=bodyPitch*pi/180;return yawed({v.x,int(v.y*std::cos(a)+v.z*std::sin(a)),int(-v.y*std::sin(a)+v.z*std::cos(a))},heading);}
- Vector3 worldPoint(Vector3 v)const{return position+direction(v);}
+ Vector3 direction(Vector3 v)const{if(bodyRoll){float r=bodyRoll*pi/180;v={int(v.x*std::cos(r)-v.y*std::sin(r)),int(v.x*std::sin(r)+v.y*std::cos(r)),v.z};}float a=bodyPitch*pi/180;return yawed({v.x,int(v.y*std::cos(a)+v.z*std::sin(a)),int(-v.y*std::sin(a)+v.z*std::cos(a))},heading);}
+ Vector3 worldPoint(Vector3 v)const{Vector3 pivot{0,suspension?70:0,0};return position+pivot+direction(v-pivot);}
  Vector3 wheelRotation(int spin,int roll)const{
-  if(!bodyPitch)return {spin,int(heading),roll};
+  if(!bodyPitch&&!bodyRoll)return {spin,int(heading),roll};
+  roll+=bodyRoll;
   // Compose body yaw/pitch with the pod hinge and wheel spin, then decompose
   // to Jet's Rz*Ry*Rx order. Adding Euler angles would twist the hover pods.
   float y=heading*pi/180,p=bodyPitch*pi/180,r=roll*pi/180,x=spin*pi/180;
@@ -22,7 +23,7 @@ struct Vehicle {
   float m21=sy*sr*cx-cy*sp*cr*cx+cy*cp*sx,m22=-sy*sr*sx+cy*sp*cr*sx+cy*cp*cx;
   return {int(std::round(std::atan2(m21,m22)*180/pi)),int(std::round(std::asin(std::clamp(-m20,-1.f,1.f))*180/pi)),int(std::round(std::atan2(m10,m00)*180/pi))};
  }
- void add(Object* o,Vector3 local={0,0,0},int kind=0){if(local.x==0&&local.y==0&&local.z==0)local=o->position;parts.push_back({o,local,kind});}
+ void add(Object* o,Vector3 local={0,0,0},int kind=0){o->preciseDepthSort=true;if(local.x==0&&local.y==0&&local.z==0)local=o->position;parts.push_back({o,local,kind});}
  void face(Object* o,Vector3 a,Vector3 b,Vector3 c,Vector3 d,Material* m,Vector3 outward){
   auto u=b-a,v=c-a;
   int64_t facing=(int64_t(u.y)*v.z-int64_t(u.z)*v.y)*outward.x+(int64_t(u.z)*v.x-int64_t(u.x)*v.z)*outward.y+(int64_t(u.x)*v.y-int64_t(u.y)*v.x)*outward.z;
@@ -113,12 +114,21 @@ struct Vehicle {
  void trafficBody(bool police,int style){
   const unsigned colors[]={0x94776C,0x547789,0xBDC2AA,0x785585,0x355665,0xB88542};
   metal=bank.paint(police?0xD4DCDF:colors[style%6]);auto* trim=bank.paint(0x172532);
+  // Closed, recessed wheel wells. The old uninterrupted side quads passed
+  // through the tyres and made their large depth gradients hard to order.
+  auto* chassis=bank.object();chassis->cullingMode=CullingMode::CULL_BACKFACES;
+  const int zs[]={-280,-225,-202,-138,-115,115,138,202,225,280};
+  const int lips[]={40,40,104,104,40,40,104,104,40,40};
+  auto ring=[&](int i,Vector3* points){int z=zs[i],lip=lips[i];
+   const Vector3 section[]={{-114,118,z},{114,118,z},{130,106,z},{130,lip,z},{96,lip,z},{96,36,z},{-96,36,z},{-96,lip,z},{-130,lip,z},{-130,106,z}};
+   std::copy(std::begin(section),std::end(section),points);
+  };
+  const Vector3 outward[]={{0,1,0},{1,1,0},{1,0,0},{0,-1,0},{1,0,0},{0,-1,0},{-1,0,0},{0,-1,0},{-1,0,0},{-1,1,0}};
+  Vector3 a[10],b[10];ring(0,a);
+  for(int i=1;i<10;++i){ring(i,b);for(int j=0;j<10;++j)face(chassis,a[j],b[j],b[(j+1)%10],a[(j+1)%10],j<=2||j>=8?metal:trim,outward[j]);std::copy(std::begin(b),std::end(b),a);}
+  for(int end:{0,9}){ring(end,a);Vector3 center{0,75,zs[end]};for(int j=0;j<10;++j)triangle(chassis,center,a[j],a[(j+1)%10],trim,{0,0,end?1:-1});}
+  bank.finish(chassis);add(chassis);
   auto* body=bank.object();
-  quad(body,{-130,45,-280},{130,45,-280},{118,112,-260},{-118,112,-260},metal);
-  quad(body,{130,45,-280},{130,45,280},{119,102,280},{118,112,-260},metal);
-  quad(body,{130,45,280},{-130,45,280},{-119,102,280},{119,102,280},metal);
-  quad(body,{-130,45,280},{-130,45,-280},{-118,112,-260},{-119,102,280},metal);
-  quad(body,{-118,112,-260},{118,112,-260},{119,102,280},{-119,102,280},metal);
   auto* glass=bank.paint(police?0x25495F:0x2E5768);int roof=style%2?204:178;
   quad(body,{-101,113,-170},{101,113,-170},{82,roof,-105},{-82,roof,-105},glass);
   quad(body,{-101,108,165},{-82,roof,12},{82,roof,12},{101,108,165},glass);
@@ -127,7 +137,7 @@ struct Vehicle {
   quad(body,{-82,roof,-105},{82,roof,-105},{82,roof,12},{-82,roof,12},metal);
   // Door belt, B pillars, handles, bumper grilles and paired lamps.
   for(int side:{-1,1}){
-   quad(body,{side*126,60,-220},{side*126,60,220},{side*124,70,220},{side*124,70,-220},trim);
+   quad(body,{side*131,60,-108},{side*131,60,108},{side*131,70,108},{side*131,70,-108},trim);
    quad(body,{side*100,111,-45},{side*100,111,-33},{side*83,roof,-33},{side*83,roof,-45},trim);
    quad(body,{side*124,89,-74},{side*124,89,-34},{side*124,94,-34},{side*124,94,-74},bank.paint(0xB9CFD5));
    auto* lamp=bank.paint(0xFFE3AA);
@@ -159,14 +169,16 @@ struct Vehicle {
   if(lite)trafficBody(police,style);else heroBody(transformable);
   auto* shadow=panel({-116,3,-255},{116,3,-255},{116,3,255},{-116,3,255},bank.paint(0x070E1A));add(shadow,{},11);
  }
- void pose(Vector3 pos,float yaw,float hover=0,float fire=0,float blink=0,float pitch=0){
-  position=pos;heading=yaw;bodyPitch=int(std::round(pitch));wheelGlow->alpha=uint8_t(std::min(255.f,hover*190+fire*65));
+ void pose(Vector3 pos,float yaw,float hover=0,float fire=0,float blink=0,float pitch=0,float lean=0){
+  position=pos;heading=yaw;bodyPitch=int(std::round(pitch));bodyRoll=int(std::round(lean));suspension=hover==0&&(bodyPitch||bodyRoll);wheelGlow->alpha=uint8_t(std::min(255.f,hover*190+fire*65));
   for(auto& p:parts){auto* o=p.object;Vector3 local=p.local;int roll=0;o->enabled=true;
    // Outboard faces rotate DOWN, with mirrored hinges on opposite sides.
    if(p.kind==2||p.kind==3){roll=int((p.kind==2?90:-90)*hover);local.x+=int((p.kind==2?-28:28)*hover);local.y+=int(10*hover);}
    if(p.kind==5||p.kind==6)o->enabled=(int(blink*8)%2)==(p.kind==5?0:1);
-   o->setPosition(worldPoint(local));o->setRotation((p.kind==2||p.kind==3)?wheelRotation(int(wheelPhase),roll):Vector3{-bodyPitch,int(yaw),0});
-   if(p.kind==11){o->setRotation(0,int(yaw),0);o->position.y=0;o->enabled=pos.y<500;}
+   bool wheel=p.kind==2||p.kind==3;
+   o->setPosition(wheel&&suspension?pos+yawed(local,yaw):worldPoint(local));
+   o->setRotation(wheel?(suspension?Vector3{int(wheelPhase),int(yaw),0}:wheelRotation(int(wheelPhase),roll)):(bodyRoll?wheelRotation(0,0):Vector3{-bodyPitch,int(yaw),0}));
+   if(p.kind==11){o->setPosition(pos);o->setRotation(0,int(yaw),0);o->position.y=0;o->enabled=pos.y<500;}
    if(p.kind==1){for(size_t i=0;i<o->vertices.size();++i){auto& v=o->vertices[i];v.uv=environmentReflectionUV(worldPoint(v.position),direction(v.normal),camera.position);if(i%4)v.uv.x=unwrapEnvironmentU(v.uv.x,o->vertices[i-i%4].uv.x);}}
   }
  }

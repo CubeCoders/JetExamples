@@ -68,10 +68,11 @@ inline void checkTraffic(float seconds){
 
 inline void checkVehicleCameras(float seconds){
  using namespace Film;
- auto check=[&](const Vehicle& car){if(car.parts.empty())return;auto local=yawed(camera.position-car.position,-car.heading);float a=car.bodyPitch*pi/180;local={local.x,int(local.y*std::cos(a)-local.z*std::sin(a)),int(local.y*std::sin(a)+local.z*std::cos(a))};
+ auto check=[&](const Vehicle& car){if(car.parts.empty()||!car.parts.front().object->enabled)return;Vector3 pivot{0,car.suspension?70:0,0};auto local=yawed(camera.position-car.position-pivot,-car.heading);float a=car.bodyPitch*pi/180;local={local.x,int(local.y*std::cos(a)-local.z*std::sin(a)),int(local.y*std::sin(a)+local.z*std::cos(a))};
+  float r=-car.bodyRoll*pi/180;local={int(local.x*std::cos(r)-local.y*std::sin(r)),int(local.x*std::sin(r)+local.y*std::cos(r)),local.z};local=local+pivot;
   if(std::abs(local.x)<205 && std::abs(local.z)<330 && local.y>-25 && local.y<230){std::fprintf(stderr,"Camera clips vehicle at %.2f: local %d %d %d\n",seconds,local.x,local.y,local.z);assert(false);}
  };
  check(hero);for(auto& car:traffic)check(car);for(auto& car:police)check(car);
- if(shot==7){assert(!overlapCars(police[0],police[1]));for(auto& cop:police)assert(!overlapCars(hero,cop));}
- if(shot==7)for(auto& cop:police)for(auto& car:traffic)if(overlapCars(cop,car)){std::fprintf(stderr,"Police clips traffic at %.2f\n",seconds);assert(false);}
+ if(shot==7||(shot==6&&shotTime>=exitTrackingStart)){assert(!overlapCars(police[0],police[1]));for(auto& cop:police)assert(!overlapCars(hero,cop));}
+ if(shot==7||(shot==6&&shotTime>=exitTrackingStart))for(auto& cop:police)for(auto& car:traffic)if(overlapCars(cop,car)){std::fprintf(stderr,"Police clips traffic at %.2f\n",seconds);assert(false);}
 }

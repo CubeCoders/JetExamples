@@ -9,7 +9,7 @@ struct Searchlight {Object* mesh;int phase;};
 inline std::vector<Searchlight> searchlights;
 inline std::vector<Object*> holograms;
 inline void animateCity(float t){
- for(auto& b:searchlights){b.mesh->rotation.z=int(19*std::sin(t*.31f+b.phase));b.mesh->rotation.y=int(20*std::sin(t*.19f+b.phase));}
+ for(auto& b:searchlights){b.mesh->rotation.z=int(36*std::sin(t*.82f+b.phase));b.mesh->rotation.y=int(48*std::sin(t*.57f+b.phase));}
  for(size_t i=0;i<holograms.size();++i){holograms[i]->position.y=1000+int(i)*110+int(24*std::sin(t*.7f+i));}
 }
 inline void glow(Vector3 p,int scale=2){auto* s=bank.sprite(bank.texture(&glowTex),0,0,10);s->blendMode=BlendMode::BLEND_ADD;s->textureFlags=Sprite2D::MIRROR_X|Sprite2D::MIRROR_Y;s->scale=scale*renderScale;glows.push_back({p,s,scale});}
@@ -27,7 +27,7 @@ inline void building(int x,int z,int width,int depth,int height,int style,bool d
  panel({x-width/2-2,30,z+depth/2-depth/6},{x-width/2-2,30,z-depth/2+depth/6},{x-width/2-2,height-65,z-depth/2+depth/6},{x-width/2-2,height-65,z+depth/2-depth/6},windows);
  if(detail){
   auto* trim=bank.paint(style%2?0xEA4BAF:0x37C8E2);
-  box(x-width/2-4,height/2,z-depth/2-4,7,height,7,trim);
+  neonLine({x-width/2-4,0,z-depth/2-4},{x-width/2-4,height,z-depth/2-4},trim);
   if(style%3==1)box(x,height+60,z,width/2,120,depth/2,bank.paint(0x36475D));
   if(style%3==0){box(x,height+80,z,14,160,14,trim);glow({x,height+164,z},2);}
  }
@@ -36,9 +36,10 @@ inline void skyline(){
  for(int i=0;i<17;++i){int x=(i-8)*440,z=2500+(i%3)*330,h=600+(i*433)%1400;building(x,z,330+(i%3)*70,340,h,i,i%2==0);}
  // Distinct central spire and a lit bridge over the far riverbank.
  building(240,2200,510,480,2200,1);box(240,2280,2200,100,160,100,bank.paint(0xB954CA));glow({240,2370,2200},3);
- auto* beam=bank.paint(0x38B4E9,25,ShadingMode::ADDITIVE);
- for(int x:{-1400,1450}){auto* b=panel({-18,0,0},{18,0,0},{220,1750,0},{-220,1750,0},beam);b->position={x,650,1600};searchlights.push_back({b,x<0?0:3});glow({x,660,1600},2);}
- auto* bridge=bank.paint(0x31CEDB);box(0,90,1900,8000,24,60,bank.paint(0x1F3247));box(0,130,1880,8000,7,7,bridge);
+ auto* beam=bank.paint(0x54C8FF,65,ShadingMode::ADDITIVE);
+ auto* core=bank.paint(0xB9EFFF,100,ShadingMode::ADDITIVE);
+ for(int x:{-1400,1450}){for(int layer=0;layer<2;++layer){int spread=layer?115:380;auto* b=panel({-18,0,0},{18,0,0},{spread,2200,0},{-spread,2200,0},layer?core:beam);b->position={x,650,1600};searchlights.push_back({b,x<0?0:3});}glow({x,660,1600},3);}
+ auto* bridge=bank.paint(0x31CEDB);box(0,90,1900,8000,24,60,bank.paint(0x1F3247));neonLine({-4000,130,1880},{4000,130,1880},bridge);
  auto* holo=bank.texture(&holoTex,150);holo->shadingMode=ShadingMode::ADDITIVE;
  for(int i=0;i<3;++i){auto* o=bank.own(Primitives::createBillboard(380,570,holo));o->cullingMode=CullingMode::NO_CULLING;o->setPosition(-1700+i*1680,1000+i*110,1550);bank.finish(o);holograms.push_back(o);}
  water=bank.paint(0x102D4E,100,ShadingMode::WATER_REFLECT);water->specular=30;
@@ -68,7 +69,7 @@ inline void street(int halfWidth=320,int blocks=12,bool mirror=false,int detaile
     // skyline, lit facade and reflection without near-field shop furniture.
     auto* facade=panel({faceX,16,z-300},{faceX,16,z+300},{faceX,h-40,z+300},{faceX,h-40,z-300},farWindows[k]);
     if(side>0)for(auto& v:facade->vertices)v.uv.x=1024-v.uv.x;
-    panel({faceX-side,40,z-307},{faceX-side,40,z-300},{faceX-side,h-40,z-300},{faceX-side,h-40,z-307},i%2?pink:trim);
+    neonLine({faceX-side,40,z-304},{faceX-side,h-40,z-304},i%2?pink:trim);
     continue;
    }
    panel({faceX,350,z-300},{faceX,350,z+300},{faceX,h-40,z+300},{faceX,h-40,z-300},windows[k]);
@@ -76,7 +77,7 @@ inline void street(int halfWidth=320,int blocks=12,bool mirror=false,int detaile
    panel({side*halfWidth,8,z-340},{side*(halfWidth+100),8,z-340},{side*(halfWidth+100),8,z+340},{side*halfWidth,8,z+340},curb,true);
    // Sloped canopies, angled braces and a projecting sign break the box grid.
    panel({faceX,345,z-308},{faceX,345,z+308},{side*(halfWidth-58),303,z+308},{side*(halfWidth-58),303,z-308},awning);
-   panel({side*(halfWidth-59),303,z-309},{side*(halfWidth-59),303,z+309},{side*(halfWidth-59),297,z+309},{side*(halfWidth-59),297,z-309},i%2?pink:trim);
+   neonLine({side*(halfWidth-59),300,z-309},{side*(halfWidth-59),300,z+309},i%2?pink:trim);
    auto* lamp=bank.object();lamp->isBillboard=true;lamp->setPosition(side*(halfWidth-18),0,z+280);
    quad(lamp,{-3,0,0},{3,0,0},{3,290,0},{-3,290,0},pipe);
    quad(lamp,{-24,290,0},{24,290,0},{24,295,0},{-24,295,0},trim);bank.finish(lamp);lamp->fadeNear=lamp->fadeFar=3000;
@@ -84,7 +85,7 @@ inline void street(int halfWidth=320,int blocks=12,bool mirror=false,int detaile
    int sx=side*(halfWidth-24);
    panel({sx,360,z-220},{sx,360,z+85},{sx,462,z+85},{sx,462,z-220},sm);
    if(i%3==0){panel({side*(halfWidth-4),470,z-302},{side*(halfWidth-105),470,z-302},{side*(halfWidth-105),650,z-302},{side*(halfWidth-4),650,z-302},sm);glow({sx,388,z-65},1);}
-   panel({side*(halfWidth-4),480,z-316},{side*(halfWidth-4),480,z-309},{side*(halfWidth-4),950,z-309},{side*(halfWidth-4),950,z-316},i%2?pink:trim);
+   neonLine({side*(halfWidth-4),480,z-312},{side*(halfWidth-4),950,z-312},i%2?pink:trim);
    if(side>0)for(size_t n=artFirst;n<bank.objects.size();++n){auto* art=bank.objects[n].get();if(art->triangles.empty()||!art->triangles[0].material->diffuseMap)continue;for(auto& v:art->vertices)v.uv.x=1024-v.uv.x;}
    if(!mirror){auto* wet=bank.paint(i%2?0xD0398C:0x309CA5,38);int wx=side*(halfWidth-100);panel({wx-20,2,z-210},{wx+20,2,z-210},{wx+10,2,z+240},{wx-10,2,z+240},wet,true);}
    if(!mirror){
@@ -94,7 +95,7 @@ inline void street(int halfWidth=320,int blocks=12,bool mirror=false,int detaile
     bank.lodStorage.emplace_back(new Object);auto* low=bank.lodStorage.back().get();
     quad(low,{faceX,350,z-300},{faceX,350,z+300},{faceX,h-40,z+300},{faceX,h-40,z-300},farWindows[k]);
     quad(low,{faceX,16,z-300},{faceX,16,z+300},{faceX,305,z+300},{faceX,305,z-300},fronts[k]);
-    quad(low,{faceX,299,z-309},{faceX,299,z+309},{faceX,305,z+309},{faceX,305,z-309},i%2?pink:trim);
+    quad(low,{faceX,286,z-309},{faceX,286,z+309},{faceX,318,z+309},{faceX,318,z-309},i%2?pink:trim);
     if(side>0)for(auto& v:low->vertices)v.uv.x=1024-v.uv.x;
     low->calculateBoundingBox();low->cachePositions();head->lodMeshes.push_back(low);
    }
@@ -121,6 +122,6 @@ inline void boulevard(int blocks=12){
 inline void cityGrid(){
  auto* streetMat=bank.paint(0x142438);panel({-8500,0,-8500},{8500,0,-8500},{8500,0,8500},{-8500,0,8500},streetMat,true);
  for(int i=0;i<7;++i)for(int j=0;j<5;++j){int x=(i-3)*1350,z=(j-1)*1450;building(x,z,620,710,700+(i*371+j*529)%1300,i+j,false);}
- auto* lit=bank.paint(0x34AEBE);for(int i=-3;i<=3;++i){int x=i*1350+570;panel({x-5,2,-3000},{x+5,2,-3000},{x+5,2,7800},{x-5,2,7800},lit,true);}
+ auto* lit=bank.paint(0x34AEBE);for(int i=-3;i<=3;++i){int x=i*1350+570;neonLine({x,2,-3000},{x,2,7800},lit,10);}
 }
 }
