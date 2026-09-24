@@ -21,7 +21,7 @@ The cube remains the minimal reusable template.
 | 08c | `esp32-object-blending` | Remaining 3D object blend equations: subtract, scale, average and XOR | Planned |
 | 08d | `esp32-lod-billboards` | Woodland: full/simple pine mesh LOD, matched billboard stand-in, distance fade and full-mesh reference pass | Approved on S3 |
 | Film | `esp32-neon-film` | ESP 88: twelve-scene original neon city cinematic, scene asset lifetimes, autonomous coupe, pursuit, wheel-only flight and waterfront credits | Approved |
-| Exhibition | `esp32-matter` | MATTER: three-minute procedural art exhibition, kinetic sculpture, analytic surface deformation, chrome, folded paper, phyllotaxis and ceramic tunnel | Ready for S3 review |
+| Exhibition | `esp32-matter` | MATTER: three-minute procedural art exhibition, kinetic sculpture, analytic surface deformation, chrome, folded paper, phyllotaxis and ceramic tunnel | Approved |
 | 09 | `esp32-geometry-depth` | Primitives, billboards, near/far clipping, culling, depth bias, optional Z buffering, picking and distance/LOD fades | Planned |
 
 Every completed project will document its configuration, assets, measured S3
