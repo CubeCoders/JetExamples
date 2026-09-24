@@ -1,8 +1,11 @@
 # ESP 88 — a demo by CubeCoders
 
+![ESP 88: ESP32-style screenshot, performance overlay hidden](../docs/screenshots/esp32-neon-film.png)
+
 A 116-second, twelve-scene Jet cinematic, followed by a one-second black hold
-and an intentional ESP32 restart. This example is being reviewed and tuned;
-the 50–60 fields/s performance target is not yet met throughout.
+and an intentional ESP32 restart. The completed film was reviewed on S3;
+demanding shots can drop below the 60-field/s target. See the validation record
+for measured performance.
 
 The original low wedge coupe, compact streets and framing follow the
 [car design](references/car-design.png) and one concept reference per shot.

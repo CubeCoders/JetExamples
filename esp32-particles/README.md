@@ -1,5 +1,7 @@
 # Particle Lab
 
+![Particle Lab: ESP32-style screenshot, performance overlay hidden](../docs/screenshots/esp32-particles.png)
+
 A small unlit chamber demonstrates Jet's fixed-pool particle system through four
 seven-second stages (28 seconds per loop):
 

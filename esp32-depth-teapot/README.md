@@ -1,5 +1,7 @@
 # Depth testing: painter versus Z buffer
 
+![Depth comparison: ESP32-style screenshot, performance overlay hidden](../docs/screenshots/esp32-depth-teapot.png)
+
 The same glossy red Utah teapot repeats a seven-second rotation, alternating
 between painter sorting and depth testing every seven seconds. Pitch and roll
 repeat with yaw, so both modes follow the same motion. Phong lighting, geometry,

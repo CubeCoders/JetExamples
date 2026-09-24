@@ -1,5 +1,7 @@
 # Woodland / LOD
 
+![Woodland: ESP32-style screenshot, performance overlay hidden](../docs/screenshots/esp32-lod-billboards.png)
+
 A tiered pine in a daylight meadow changes from a full mesh to a simpler mesh and
 finally a camera-facing image as the camera retreats. A path, fence and distant
 tree line give the scene scale. The featured tree always occupies the same

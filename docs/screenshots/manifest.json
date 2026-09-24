@@ -1,0 +1,139 @@
+{
+  "format": 1,
+  "size": [
+    480,
+    320
+  ],
+  "capture": "native renderer with firmware settings; frozen paired fields; no performance overlay",
+  "jet_commit": "b412c8793098cedf6ff674cb051d13747f75ac42",
+  "captures": [
+    {
+      "example": "esp32-template-cube",
+      "seconds": 0,
+      "file": "esp32-template-cube.png",
+      "title": "Rotating cube",
+      "sha256": "3b99187a62f13f72b0dd5023abdf5c96ea98e7709660a489a2cb7a3b61253e22",
+      "config_sha256": "b7ed1fbb77c20af6fb188a6b44d4fa41b4c8865affd0f8b3e035d66ac246cc22"
+    },
+    {
+      "example": "esp32-lighting-teapot",
+      "seconds": 7.5,
+      "file": "esp32-lighting-teapot.png",
+      "title": "Utah teapot lighting",
+      "sha256": "e404183ec274284cd9f0e0446c46acda9514d8952d675b46475fdbf7ac8d2267",
+      "config_sha256": "378fb7f7b8e0ae400e89968838c5d90e8896c38be08c646122d4a669434e82ff"
+    },
+    {
+      "example": "esp32-textured-boxes",
+      "seconds": 9.6,
+      "file": "esp32-textured-boxes.png",
+      "title": "Textured crate",
+      "sha256": "8edf44809d65a16bd0fe01a57d328d029ee8a62c5482c232984f7e672c501221",
+      "config_sha256": "a5843e2a52e45c9514cf8dce63173e55366cda55f9b7794455f5b92346835fb0"
+    },
+    {
+      "example": "esp32-tropical-island",
+      "seconds": 0.5,
+      "file": "esp32-tropical-island.png",
+      "title": "Tropical island",
+      "sha256": "3853fdb14de49be2e5706accc466d3f06c8906e8e217101cda9d2608830800fa",
+      "config_sha256": "4ebe346151fc799ab4cebf3a73ef9224c45575c18574c124428c0dcb006b62dc"
+    },
+    {
+      "example": "esp32-depth-teapot",
+      "seconds": 9.5,
+      "file": "esp32-depth-teapot.png",
+      "title": "Depth comparison",
+      "sha256": "9ae843fbb596e3177bd8efc8945c72b27b1f47ff2e5f524cf04cd555e4d07ebe",
+      "config_sha256": "8525a629721663faeb6c12c3fd406abfd3dbf913d4349156cc02dd30da61e462"
+    },
+    {
+      "example": "esp32-neon-car",
+      "seconds": 10,
+      "file": "esp32-neon-car.png",
+      "title": "Neon Motorworks",
+      "sha256": "fdfd863f458962540d3a455e13cd521c91be4cc939aa465bf9aa0ca5820e896d",
+      "config_sha256": "f6cdf3f99ba97d2d31371f4771c33ac2a83007587da7055191b43de914da1bd7"
+    },
+    {
+      "example": "esp32-texture-features",
+      "seconds": 29.5,
+      "file": "esp32-texture-features.png",
+      "title": "Texture Lab",
+      "sha256": "603e668f0ea3e1c099ce7cab03b89fadf9a590517dc8c27ffe0d200cd62be9ac",
+      "config_sha256": "17e38fc46b895fa0ccdfa8f27c8c2ee57f69d5951d0a6c98ad12f9a571ce24bd"
+    },
+    {
+      "example": "esp32-postfx-crt",
+      "seconds": 8.5,
+      "file": "esp32-postfx-crt.png",
+      "title": "CRT / Arcade",
+      "sha256": "bac540ece1ff765db674c2ec7aa6577e4cd4c7e086b3144e6f53d551bf8eec3f",
+      "config_sha256": "50ef408320b422a509db5292faba3879a336f427ec1bcae4cb9cc6c3ab74f682"
+    },
+    {
+      "example": "esp32-postfx-cel",
+      "seconds": 10.2,
+      "file": "esp32-postfx-cel.png",
+      "title": "Cel / Teapot",
+      "sha256": "4bfa03e938f373fddb5ccf5a687bc88e756764bfd22d20345fc43748e96df3f9",
+      "config_sha256": "ef0bd76e3d3b16d5b1a45e152367b5066b40cb66d5ef7f96efedd6173acd8298"
+    },
+    {
+      "example": "esp32-particles",
+      "seconds": 15.4,
+      "file": "esp32-particles.png",
+      "title": "Particle Lab",
+      "sha256": "fe077c4a9ab2e1747f5acd9bda6b96154e7d30235105883e1e8fe56001e95f8b",
+      "config_sha256": "1adb926ccbc5da7a9fffc254b8dc71e9d422e628671a8bfff72c4948c3fa88b9"
+    },
+    {
+      "example": "esp32-sprites-blending",
+      "seconds": 6,
+      "file": "esp32-sprites-blending.png",
+      "title": "After Hours",
+      "sha256": "03492b9551eecb453a9005da1b7da4e4422eeadd72fac4aa7b8294e6235569ef",
+      "config_sha256": "f8c43d8537a7ffdfe3431be6509998bc39cbf0b0a0dfee4588f8bbb52e4f9cad"
+    },
+    {
+      "example": "esp32-sprite-controls",
+      "seconds": 19,
+      "file": "esp32-sprite-controls.png",
+      "title": "Air Mail",
+      "sha256": "aca0c24607876a46e1a44c13e146eca6e4b1c4ba32a330109d128593f931fc89",
+      "config_sha256": "10b3e81c47c02d6116c42c4e5bd6717a3716692be7e090e70004c07b82271f51"
+    },
+    {
+      "example": "esp32-lod-billboards",
+      "seconds": 1,
+      "file": "esp32-lod-billboards.png",
+      "title": "Woodland",
+      "sha256": "0f004135c3cf8485250a48cc6500670abd607cd194bf2ce9ea6068d7429ad570",
+      "config_sha256": "754d16fe9b6a1ef783e904f0610760986895bd4b42ea6598aa6a6a24c6f877d0"
+    },
+    {
+      "example": "esp32-mesh-instancing",
+      "seconds": 10.6,
+      "file": "esp32-mesh-instancing.png",
+      "title": "REPEAT",
+      "sha256": "39cce86954da6fb7158a1c4e8e579a42bf62c272088b21b485fe765a24fcc944",
+      "config_sha256": "71f8dd392292ba954e3f63fcf693285123bf00befd4a018a52757d336ee1af65"
+    },
+    {
+      "example": "esp32-neon-film",
+      "seconds": 8,
+      "file": "esp32-neon-film.png",
+      "title": "ESP 88",
+      "sha256": "f8841cc9d70df2cf2998770ed261cf397bc5134fe4462c088da215298ea3bbd8",
+      "config_sha256": "e2cde670e586fe97562561e522692473545396597a0a70008c14d693e59b9aff"
+    },
+    {
+      "example": "esp32-matter",
+      "seconds": 169,
+      "file": "esp32-matter.png",
+      "title": "MATTER",
+      "sha256": "7a404278c61a40609d83a32b07d88ca3db60a8d0fb1556a66989d9895537c5ed",
+      "config_sha256": "65b9f01fe90ff7e199f7ef406442e51c1d222c5ea5311e1fc9789c301140dfe8"
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 # Neon Motorworks - imported model and environment mapping
 
+![Neon Motorworks: ESP32-style screenshot, performance overlay hidden](../docs/screenshots/esp32-neon-car.png)
+
 A 20-second camera orbit around a glossy race car in a neon workshop.
 The supplied OBJ and MTL are parsed by Jet at startup: this is a model-loading
 example, not a generated C++ mesh. The car contains 404 triangles, including

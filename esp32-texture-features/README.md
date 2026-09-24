@@ -1,5 +1,7 @@
 # Texture Lab - addressing, transparency, palettes and texture LOD
 
+![Texture Lab: ESP32-style screenshot, performance overlay hidden](../docs/screenshots/esp32-texture-features.png)
+
 A labelled console cycles through seven stages, seven seconds each (49 seconds
 per loop), using the shared ESP32 scanout and FPS/MS/TRIS/TRI-S overlay.
 

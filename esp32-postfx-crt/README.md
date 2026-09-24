@@ -1,5 +1,7 @@
 # CRT / Arcade
 
+![CRT / Arcade: ESP32-style screenshot, performance overlay hidden](../docs/screenshots/esp32-postfx-crt.png)
+
 A bright arcade test card and spinning textured cube compare Jet's in-place CRT
 scanlines. The effect switches off/on every **seven seconds**. Cube motion repeats
 exactly in each interval, giving a 14-second comparison loop. Fine lines, colour

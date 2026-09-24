@@ -1,5 +1,7 @@
 # Cel / Teapot
 
+![Cel / Teapot: ESP32-style screenshot, performance overlay hidden](../docs/screenshots/esp32-postfx-cel.png)
+
 The glossy red Utah teapot alternates between smooth Phong lighting and
 four-band cel lighting, **seven seconds per mode**. Both modes repeat the same
 complete rotation and rocking motion. Geometry, material, lights, camera,

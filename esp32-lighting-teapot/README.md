@@ -1,5 +1,7 @@
 # 01 - Utah teapot: Flat, Gouraud and Phong
 
+![Utah teapot lighting: ESP32-style screenshot, performance overlay hidden](../docs/screenshots/esp32-lighting-teapot.png)
+
 A red Utah teapot rotates beneath a fixed directional light against a blue
 gradient. Every three seconds it switches Flat / Gouraud / Phong, with a matching
 caption. The same mesh, light and motion continue across each switch. The shared

@@ -1,5 +1,7 @@
 # Air Mail
 
+![Air Mail: ESP32-style screenshot, performance overlay hidden](../docs/screenshots/esp32-sprite-controls.png)
+
 A red mail plane flies over a sunlit patchwork of fields and distant hills.
 The countryside is simple unlit 3D geometry; the aircraft is one original
 64x32 colour-keyed RGB565 sprite, drawn at 2x scale at full LCD resolution.

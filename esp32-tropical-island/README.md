@@ -1,5 +1,7 @@
 # 03 - Tropical island
 
+![Tropical island: ESP32-style screenshot, performance overlay hidden](../docs/screenshots/esp32-tropical-island.png)
+
 A sunny low-poly island with five palms, faceted sand and rocks, turquoise
 water, a bright sky gradient and an orbiting camera. The camera circles every
 15 seconds, gently approaching and retreating between radii of 1,540 and 2,060

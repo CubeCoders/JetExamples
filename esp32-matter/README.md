@@ -1,5 +1,7 @@
 # MATTER
 
+![MATTER: ESP32-style screenshot, performance overlay hidden](../docs/screenshots/esp32-matter.png)
+
 A three-minute procedural art exhibition, rendered live by Jet on ESP32-S3.
 No city, vehicles, story or synthwave palette: ten kinetic installations explore
 cast metal, concrete, paper, chrome, primary colour, botanical form, woven ink,

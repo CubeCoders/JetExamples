@@ -1,5 +1,7 @@
 # 02 - Texture mapping and filtering
 
+![Textured crate: ESP32-style screenshot, performance overlay hidden](../docs/screenshots/esp32-textured-boxes.png)
+
 A plain 200-unit cube (12 triangles, 24 face vertices) spins close to the camera
 at 65 degrees/second with faster rocking. All six faces use one shared 128x128
 crate texture. The bright blue background, field FPS, triangle count and

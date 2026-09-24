@@ -1,5 +1,7 @@
 # REPEAT: shared mesh instancing
 
+![REPEAT: ESP32-style screenshot, performance overlay hidden](../docs/screenshots/esp32-mesh-instancing.png)
+
 Fifteen glossy, coloured rotors alternate every eight seconds between independent
 mesh copies and instances of one immutable mesh. The geometry, colours, lighting
 and motion match. Watch the mesh-storage figure change while the picture stays
@@ -17,12 +19,6 @@ Repetition count alone is not a useful threshold: four of these larger rotors
 already benefit, while 15 simple cubes gain very little. Mesh complexity,
 lighting work and the order in which geometry is reused all matter. Flat
 lighting still uses normals; unlit/emissive paths skip that work.
-
-![Copies and instances at the same pose](assets/instancing.png)
-
-This native preview uses the S3's field layout and RGB565 colours. Its counters
-are deliberately unmeasured. The memory labels reflect the desktop ABI; the S3
-uses smaller pointers and triangle records.
 
 ## What the comparison measures
 

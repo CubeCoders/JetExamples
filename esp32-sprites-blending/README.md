@@ -1,4 +1,6 @@
-# After Hours — a small neon courtyard
+# After Hours â€” a small neon courtyard
+
+![After Hours: ESP32-style screenshot, performance overlay hidden](../docs/screenshots/esp32-sprites-blending.png)
 
 A warm/cool pair of lamps, a late-night cafe, planters and a slowly rotating
 faceted sculpture demonstrate how simple blending can suggest expensive lighting
