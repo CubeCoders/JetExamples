@@ -21,23 +21,29 @@ not used or bundled in this project.
 | 53–64 | Right turn into a compact three-lane boulevard | [07](references/cut-07.png) |
 | 64–78 | Staged overtakes, pursuing police and four camera positions | [08](references/cut-08.png) |
 | 78–88 | Wheels slow and hinge downward; cyan hub glow builds | [09](references/cut-09.png) |
-| 88–93 | Flash, rise and frozen city motion | [10](references/cut-10.png) |
+| 88–93 | Pitched climb, forward flight and frozen police | [10](references/cut-10.png) |
 | 93–101 | Ascending fly-by, city overview and fade-out | [11](references/cut-11.png) |
 
 Camera translation is linear within each tracking shot; the front orbit uses
 constant angular progression. Smooth lane changes describe vehicle steering,
 not camera easing. The wheels provide the entire hover conversion: no wings
 or deployed rear engine. The launch has no flash: the car retains its forward
-speed of 1,800 world units/s while climbing at 650 units/s. The final camera
+speed of 88 MPH while climbing at 650 world units/s. Its nose follows the
+flight direction, including the hinged wheels, window reflections and glow sprites. The final camera
 waits ahead of its flight path, letting the coupe pass close to the lens before
 tilting down over the city and fading out. Road sections recycle around the tracking camera. The
 framing uses offset subjects and diagonal street lines, with a fixed lens per
 cut rather than a uniform centred composition.
 
+The 570-unit coupe represents a 4.5-metre car: 70 MPH is 6.95 car lengths
+per second and 88 MPH is 8.74. Road parallax and wheel rotation use the same
+conversion. The tight right turn slows to roughly 25 MPH, then cuts back to
+the faster boulevard tracking rig. The speedometer keeps its 70–88 MPH climb.
+
 Street draw distance is 9,000 world units. Recycled streets provide sixteen
 blocks and put their longer extent in the viewing direction, including behind
 the car for front tracking. The fixed rain street uses simpler distant facades;
-the boulevard exit extends far enough to cover the complete driving path.
+the boulevard exit recycles sixteen blocks along its eastbound axis.
 Painter sorting uses 128 depth buckets to preserve nearby surface ordering at
 this range: still one byte per triangle, plus 512 bytes of sorting stack versus
 the default 64 buckets. Jet's default configuration remains unchanged.
@@ -69,8 +75,11 @@ retain their original falloff.
   transforms and runtime work. Adjacent shop details share transform work.
 - Closed hero body, shared canopy/glass boundaries, inner wheel-well walls,
   a continuous chassis floor and capped wheels that remain sealed in hover mode.
-- Enclosed cockpit with sloping windscreen pillars, roof header, door trim,
-  centre console and an unattended yoke; the driver camera stays at road height.
+- Enclosed cockpit with sloping windscreen pillars, roof header and door trim.
+  One low dashboard holds two flush displays and a slim red scanner; its open
+  centre makes the autonomous layout clear. The driver camera stays at road height.
+  The speed display updates a scene-local 16 KiB RGB565 texture only when its
+  integer value changes; the allocation prefers PSRAM on the S3.
 - Only the rounded FPS number appears at the absolute top-right on hardware.
   Full timing and triangle information remains in serial diagnostics.
 
@@ -111,9 +120,9 @@ reconstructs the same alternating packed fields, including previous-field water
 and scanline sprite compositing. It omits the hardware FPS overlay: native
 export speed is not an S3 measurement. Silent video is for visual review.
 
-A separate desktop quality target renders full 2880�1920 RGB565 colour and
+A separate desktop quality target renders full 2880×1920 RGB565 colour and
 depth buffers at every frame, with bilinear textures, perspective mapping and
-full-detail meshes. The export downsamples to 1920�1280 at 60 fps using Lanczos
+full-detail meshes. The export downsamples to 1920×1280 at 60 fps using Lanczos
 filtering for spatial anti-aliasing. It has no packed fields, scanline
 reconstruction or hardware counters. Geometry, artwork and camera paths are
 shared with the S3 build; it remains an actual Jet render, not a ray-traced remake.

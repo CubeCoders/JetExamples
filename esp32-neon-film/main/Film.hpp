@@ -21,60 +21,50 @@ inline uint16_t sky[renderHeight];
 inline Vehicle hero,police[2],traffic[6];
 inline ParticleSystem particles(1.2f);
 inline std::vector<std::pair<Object*,Vector3>> scrolling;
-inline std::vector<Material*> digits,scanner;
-inline std::vector<Object*> dashboardParts;
+inline std::vector<Vector3> approachGlows;
+inline std::vector<Material*> scanner;
 inline Material fadeMat(0,uint8_t(255)),barsMat(0,uint8_t(255));
 inline Sprite2D fade,topBar,bottomBar;
-inline void digitsBuild(){
- // Seven-segment speed display, actual illuminated dashboard geometry.
- for(int d=0;d<2;++d){int x=-175+d*62,y=151,z=-69;
-  const int rects[7][4]={{5,65,36,6},{41,36,6,28},{41,4,6,28},{5,0,36,6},{0,4,6,28},{0,36,6,28},{5,32,36,6}};
-  for(auto& r:rects){auto* m=bank.paint(0xFD6836);digits.push_back(m);panel({x+r[0],y+r[1],z},{x+r[0]+r[2],y+r[1],z},{x+r[0]+r[2],y+r[1]+r[3],z},{x+r[0],y+r[1]+r[3],z},m);}
+inline std::vector<uint16_t> speedPixels;
+inline Texture speedTexture(128,64,nullptr);
+inline int displayedSpeed=-1;
+inline void speed(int value){
+ if(value==displayedSpeed)return;
+ displayedSpeed=value;
+ std::fill(speedPixels.begin(),speedPixels.end(),rgb(0x091420));
+ const int masks[]={0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f};
+ const int rects[7][4]={{5,46,32,5},{37,26,5,24},{37,3,5,22},{5,0,32,5},{0,3,5,22},{0,26,5,24},{5,23,32,5}};
+ for(int d=0;d<2;++d)for(int i=0;i<7;++i){auto& r=rects[i];int digit=d?value%10:value/10;auto c=rgb(masks[digit]&(1<<i)?0xFF7343:0x241B21);
+  for(int y=0;y<r[3];++y)for(int x=0;x<r[2];++x)speedPixels[(6+r[1]+y)*128+8+d*56+r[0]+x]=c;
  }
 }
-inline void speed(int value){const int masks[]={0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f};for(int d=0;d<2;++d){int n=d==0?value/10:value%10;for(int i=0;i<7;++i)digits[d*7+i]->color=rgb(masks[n]&(1<<i)?0xFF7343:0x382025);}}
 inline void cockpit(){
- const size_t first=bank.objects.size();
- box(0,121,-30,520,88,175,bank.paint(0x101B2C));
- panel({-245,140,-70},{245,140,-70},{245,242,-70},{-245,242,-70},bank.paint(0x152638));
- panel({5,151,-72},{225,151,-72},{225,230,-72},{5,230,-72},bank.texture(&dashTex));
- digitsBuild();
- for(int i=0;i<14;++i){auto* m=bank.paint(0x8A1733);scanner.push_back(m);box(-225+i*34,130,-95,26,7,9,m);}
- for(int side:{-1,1}){box(side*263,255,-36,25,150,30,bank.paint(0x24394A));box(side*234,114,-106,32,20,22,bank.paint(0x74EDC9));}
- for(int i=0;i<12;++i)box(-210+i*39,95,-130,25,12,16,bank.paint(i%3==0?0xF5B73C:i%3==1?0x45D8C2:0xF85589));
- // The cabin shares the exterior's scale: 260 wide, 160 to the roof.
- for(size_t i=first;i<bank.objects.size();++i){auto* o=bank.objects[i].get();o->bakeScale(1,2);o->position=o->position.divide(2)+Vector3{0,-20,120};o->cachePositions();dashboardParts.push_back(o);}
- // The gauge insert needs only its instrument binnacle. The surrounding
- // cabin is built for the wider driver view.
+ auto* dark=bank.paint(0x101B2C);auto* trim=bank.paint(0x344357);auto* cyan=bank.paint(0x399CBA);
+ // One shallow, continuous dashboard. The two screens replace sections of
+ // its face rather than floating above overlapping boxes or control panels.
+ auto face=[&](int x0,int y0,int x1,int y1,Material* m){return panel({x0,y0,100},{x1,y0,100},{x1,y1,100},{x0,y1,100},m);};
+ face(-128,38,128,51,dark);face(-128,93,128,100,trim);
+ face(-128,51,-117,93,trim);face(-19,51,1,93,trim);face(117,51,128,93,trim);
+ face(-117,51,-19,54,dark);face(-117,90,-19,93,dark);
+ face(1,51,117,54,dark);face(1,90,117,93,dark);
+ speedPixels.assign(128*64,rgb(0x091420));speedTexture.data=speedPixels.data();displayedSpeed=-1;
+ face(-117,54,-19,90,bank.texture(&speedTexture));face(1,54,117,90,bank.texture(&dashTex));
+ panel({-128,100,100},{128,100,100},{119,105,137},{-119,105,137},dark);
+ // A single flush KITT-like scanner, with real gaps between its segments.
+ for(int i=0;i<14;++i){auto* m=bank.paint(0x8A1733);scanner.push_back(m);face(-111+i*16,96,-99+i*16,98,m);}
  if(shot==4){
- // Enclose the eye position with a real interior shell. The sloping
- // pillars and roof header frame the road; instruments sit inside this cabin.
- auto* roof=bank.paint(0x101928);auto* trim=bank.paint(0x344357);auto* bevel=bank.paint(0x586985);auto* cyan=bank.paint(0x399CBA);
- panel({-170,175,-230},{170,175,-230},{145,175,-20},{-145,175,-20},roof);
- panel({-145,175,-20},{145,175,-20},{102,157,-15},{-102,157,-15},trim);
- panel({-102,157,-15},{102,157,-15},{102,160,-16},{-102,160,-16},cyan);
- for(int side:{-1,1}){
-  panel({side*88,162,-20},{side*108,169,-20},{side*150,78,115},{side*128,88,115},trim);
-  panel({side*86,161,-19},{side*89,162,-19},{side*129,89,114},{side*126,88,114},cyan);
-  // Door top, inner door card, armrest and a lit control recess.
-  panel({side*155,82,-220},{side*155,82,115},{side*128,92,115},{side*128,92,-220},bevel);
-  panel({side*155,0,-220},{side*155,0,120},{side*128,88,120},{side*128,88,-220},roof);
-  panel({side*150,72,-125},{side*121,76,-125},{side*121,76,40},{side*150,72,40},trim);
-  panel({side*129,93,-135},{side*129,93,110},{side*129,95,110},{side*129,95,-135},cyan);
+  auto* roof=bank.paint(0x101928);
+  panel({-156,183,-230},{156,183,-230},{137,175,-25},{-137,175,-25},roof);
+  panel({-137,175,-25},{137,175,-25},{111,167,-12},{-111,167,-12},trim);
+  for(int side:{-1,1}){
+   panel({side*106,167,-12},{side*121,171,-12},{side*141,87,115},{side*128,94,115},trim);
+   panel({side*105,167,-11},{side*108,168,-11},{side*130,94,114},{side*128,94,114},cyan);
+   panel({side*150,0,-220},{side*150,0,115},{side*131,84,115},{side*131,84,-220},roof);
+   panel({side*150,80,-220},{side*150,80,115},{side*131,87,115},{side*131,87,-220},trim);
+   panel({side*131,87,-200},{side*131,87,100},{side*131,89,100},{side*131,89,-200},cyan);
+  }
  }
- // Faceted console flows from the dashboard towards the seats. It is empty:
- // autonomy is indicated by the scanner and the physical display, not a driver.
- panel({-30,48,-160},{30,48,-160},{43,90,65},{-43,90,65},roof);
- panel({-30,48,-160},{-43,90,65},{-48,85,65},{-37,43,-160},trim);
- panel({30,48,-160},{43,90,65},{48,85,65},{37,43,-160},trim);
- auto* amber=bank.paint(0xE7A54D);
- for(int i=0;i<5;++i){int z=10+i*14,y=76+i*4;panel({-21,y,z},{21,y,z},{21,y+2,z+9},{-21,y+2,z+9},i%2?cyan:amber);}
- // Small squared-off yoke, deliberately unattended, in front of the left seat.
- auto* yoke=bank.paint(0x4D607A);
- panel({-73,85,-35},{-17,85,-35},{-17,95,-27},{-73,95,-27},yoke);
- panel({-74,85,-35},{-65,90,-32},{-66,120,-23},{-79,120,-23},yoke);
- panel({-25,90,-32},{-16,85,-35},{-11,120,-23},{-24,120,-23},yoke);
- }
+ // No centre tower or yoke: leave a clear view of both displays and the road.
  auto* bonnet=bank.paint(0x647DAA);
  panel({-97,111,121},{97,111,121},{108,73,285},{-108,73,285},bonnet);
 }
@@ -82,7 +72,7 @@ inline void relocate(size_t first,Vector3 origin,float yaw){for(size_t i=first;i
 // Reset the fixed particle pool in place. A ParticleSystem temporary consumes
 // over 7 KiB and overflows the ESP32 runtime task stack during scene creation.
 inline void load(int which){
- road.clear();architecture.clear();searchlights.clear();holograms.clear();hero.parts.clear();for(auto& c:police)c.parts.clear();for(auto& c:traffic)c.parts.clear();scrolling.clear();digits.clear();scanner.clear();dashboardParts.clear();glows.clear();flicker.clear();water=nullptr;heroGlow=-1;for(auto& particle:particles.pool)particle.active=false;particles.lastRenderedTriangles=0;particles.additiveSparks=true;bank.clear();
+ road.clear();architecture.clear();searchlights.clear();holograms.clear();hero.parts.clear();for(auto& c:police)c.parts.clear();for(auto& c:traffic)c.parts.clear();scrolling.clear();approachGlows.clear();std::vector<uint16_t>().swap(speedPixels);speedTexture.data=nullptr;scanner.clear();glows.clear();flicker.clear();water=nullptr;heroGlow=-1;for(auto& particle:particles.pool)particle.active=false;particles.lastRenderedTriangles=0;particles.additiveSparks=true;bank.clear();
 #if defined(ESP_PLATFORM) && defined(CONFIG_SPIRAM)
  // Preserve internal RAM for live raster/transform scratch. Mesh storage can
  // live in PSRAM and is replaced as a unit at each hard cut.
@@ -98,11 +88,13 @@ inline void load(int which){
  else if(shot==2||shot==3){street(320,16,false);road.capture(11520);hero.build();}
  else if(shot==4||shot==5){if(shot==4){street(320,16,false);road.capture(11520);}cockpit();}
  else if(shot==6){
-  street(320,8,false);relocate(0,{0,0,-3500},0);
-  size_t first=bank.objects.size(),glowFirst=glows.size();boulevard(28);
+  street(320,15,false);relocate(0,{0,0,-8500},0);
+  for(auto& o:bank.objects)scrolling.push_back({o.get(),o->position});
+  for(auto& g:glows)approachGlows.push_back(g.position);
+  size_t first=bank.objects.size(),glowFirst=glows.size();boulevard(16);
   for(size_t i=first;i<bank.objects.size();++i){auto* o=bank.objects[i].get();o->position=Vector3{1900,0,2100}+yawed(o->position,90);o->rotation.y+=90;}
   for(size_t i=glowFirst;i<glows.size();++i)glows[i].position=Vector3{1900,0,2100}+yawed(glows[i].position,90);
-  hero.build();for(int i=0;i<6;++i)traffic[i].build(false,true,false,i);
+  road.capture(11520,first,glowFirst,true);hero.build();for(int i=0;i<6;++i)traffic[i].build(false,true,false,i);
  }
  else if(shot==7){boulevard(16);road.capture(11520);hero.build();for(int i=0;i<6;++i)traffic[i].build(false,true,false,i);for(auto& c:police)c.build(true,true);}
  else if(shot==8||shot==9){boulevard(16);road.capture(11520);hero.build(false,false,true);for(auto& c:police)c.build(true,true);}
@@ -126,31 +118,37 @@ inline void weather(float t,bool debris,Vector3 origin={0,0,0}){
 }
 inline void pose(float p){
  Vector3 car{0,0,0};float yaw=0;const float t=shotTime;
- float wheelTravel=t*1900;
- if(shot==8){float braking=std::min(6.f,std::max(0.f,t-2));wheelTravel=1800*(std::min(t,2.f)+braking-braking*braking/12);}
- if(shot>=9)wheelTravel=1800*5;
+ float wheelTravel=t*(shot<6?roadSpeed:chaseSpeed);
+ if(shot==6)wheelTravel=chaseSpeed*std::min(t,turnStart)+turnRadius*pi/2*clamp((t-turnStart)/(turnEnd-turnStart))+chaseSpeed*std::max(0.f,t-turnEnd);
+ if(shot==8){float braking=std::min(6.f,std::max(0.f,t-2));wheelTravel=chaseSpeed*(std::min(t,2.f)+braking-braking*braking/12);}
+ if(shot>=9)wheelTravel=chaseSpeed*5;
  wheelPhase=std::fmod(wheelTravel*180/(44*pi),360.f);
  if(shot==0){camera.setPosition(lerp({2300,410,-1900},{-1100,460,-2300},p));camera.lookAt(lerp({-300,700,2400},{600,760,2400},p));}
- if(shot==1){camera.setPosition(lerp({-210,290,-900},{-150,65,-150},p));camera.lookAt(lerp({130,165,900},{170,70,1500},p));weather(t,false);}
- if(shot==2){road.advance(t*1900);car={0,0,0};camera.setPosition(lerp({260,700,-590},{245,590,-530},p));camera.lookAt({-25,65,-45});hero.pose(car,0);weather(t,true,car);}
- if(shot==3){road.advance(t*1900,true);car={45,0,0};float a=(-35+11*p)*pi/180;camera.setPosition(car+Vector3{int(520*std::sin(a)),int(145+20*p),int(520*std::cos(a))});camera.lookAt(car+lerp({35,95,-20},{20,100,-35},p));hero.pose(car,0);weather(t,true,car);}
- if(shot==4||shot==5){if(shot==4)road.advance(t*1900);
-  if(shot==4){camera.setPosition(lerp({-46,132,-145},{-36,130,-130},p));camera.lookAt(lerp({50,112,560},{90,110,620},p));speed(70);}
-  else{camera.setPosition(lerp({-90,92,-25},{-82,88,8},p));camera.lookAt({-61,75,86});speed(70+int(18*clamp(t/5.f)+.5f));}
+ if(shot==1){camera.setPosition(lerp({-175,270,-900},{-140,65,-150},p));camera.lookAt(lerp({130,165,900},{170,70,1500},p));weather(t,false);}
+ if(shot==2){road.advance(t*roadSpeed);car={0,0,0};camera.setPosition(lerp({140,660,-590},{120,600,-530},p));camera.lookAt({-25,65,-45});hero.pose(car,0);weather(t,true,car);}
+ if(shot==3){road.advance(t*roadSpeed,true);car={45,0,0};float a=(-30+12*p)*pi/180;camera.setPosition(car+Vector3{int(520*std::sin(a)),int(145+20*p),int(520*std::cos(a))});camera.lookAt(car+lerp({35,95,-20},{20,100,-35},p));hero.pose(car,0);weather(t,true,car);}
+ if(shot==4||shot==5){if(shot==4)road.advance(t*roadSpeed);
+  if(shot==4){camera.setPosition(lerp({-45,133,-150},{-35,131,-135},p));camera.lookAt(lerp({35,115,560},{65,114,620},p));speed(70);}
+  else{camera.setPosition(lerp({-88,79,-24},{-82,77,-6},p));camera.lookAt({-72,73,100});speed(70+int(18*clamp(t/5.f)+.5f));}
   for(size_t i=0;i<scanner.size();++i){float cursor=std::fmod(t*9,26.f);if(cursor>13)cursor=26-cursor;scanner[i]->color=rgb(std::abs(float(i)-cursor)<1.6f?0xFF403C:0x4A1727);}
  }
 
  if(shot==6){
-  if(t<3){car={0,0,int(-3400+4850*t/3)};yaw=0;camera.setPosition(car+Vector3{-230,280,-680});}
-  else if(t<5){float a=(t-3)*pi/4;car={int(650*(1-std::cos(a))),0,1450+int(650*std::sin(a))};yaw=(t-3)*45;camera.setPosition(lerp({-270,650,1600},{-270,760,2150},(t-3)/2));}
-  else{float q=t-5;auto lane=cornerLane(q);car={650+int(1900*q),0,2100-int(lanePosition(q,lane))};yaw=90+steeringYaw(laneVelocity(q,lane),1900);camera.setPosition({car.x+800,260,2620});}
-  camera.lookAt(car+(t<3?Vector3{80,100,160}:t<5?Vector3{60,100,100}:Vector3{120,100,-80}));hero.pose(car,yaw);
-  const int lanes[]={-380,0,380,380,-380,-380};
-  for(int i=0;i<6;++i)traffic[i].pose({2500+i*1600+int(800*(t-5)),0,2100-lanes[i]},90);
+  int roadTravel=int(chaseSpeed*std::max(0.f,t-turnEnd));
+  for(auto& o:scrolling)o.first->position=o.second+Vector3{-roadTravel,0,0};
+  for(size_t i=0;i<approachGlows.size();++i)glows[i].position=approachGlows[i]+Vector3{-roadTravel,0,0};
+  if(t<turnEnd)road.restore();else road.advance(float(roadTravel),true);
+  if(t<turnStart){car={0,0,1450-int(chaseSpeed*(turnStart-t))};yaw=0;camera.setPosition(car+Vector3{-160,245,-680});}
+  else if(t<turnEnd){float q=(t-turnStart)/(turnEnd-turnStart),a=q*pi/2;car={int(turnRadius*(1-std::cos(a))),0,1450+int(turnRadius*std::sin(a))};yaw=q*90;camera.setPosition(lerp({-135,950,150},{-135,1000,600},q));}
+  else{float q=t-turnEnd;auto lane=cornerLane(q);car={int(turnRadius),0,2100-int(lanePosition(q,lane))};yaw=90+steeringYaw(laneVelocity(q,lane),chaseSpeed);camera.setPosition({int(turnRadius)+800,260,2540});
+  }
+  camera.lookAt(car+(t<turnStart?Vector3{70,95,160}:t<turnEnd?Vector3{150,100,250}:Vector3{100,100,-70}));hero.pose(car,yaw);
+  const int lanes[]={-380,0,380,380,-380,-380};float q=std::max(0.f,t-turnEnd);
+  for(int i=0;i<6;++i)traffic[i].pose({int(turnRadius)+1850+i*1800-int(1100*q),0,2100-lanes[i]},90);
   weather(t,true,car);
  }
  if(shot==7){
-  road.advance(1800*t,t>=4&&t<7);auto lane=chaseLane(t);car={int(lanePosition(t,lane)),0,0};yaw=steeringYaw(laneVelocity(t,lane),1800);
+  road.advance(chaseSpeed*t,t>=4&&t<7);auto lane=chaseLane(t);car={int(lanePosition(t,lane)),0,0};yaw=steeringYaw(laneVelocity(t,lane),chaseSpeed);
   // Hard cuts between authored tracking rigs. Position changes are linear;
   // all rigs remain within the 1360-unit boulevard, clear of street furniture.
   if(t<4)camera.setPosition(lerp({240,280,-850},{280,265,-720},t/4));
@@ -160,25 +158,25 @@ inline void pose(float p){
   camera.lookAt(car+(t<4?Vector3{-65,105,150}:t<7?Vector3{50,100,-80}:t<10?Vector3{40,95,90}:Vector3{-60,60,100}));hero.pose(car,yaw);
   const int starts[]={2300,6900,11500,5000,9500,15100},lanes[]={-380,0,380,380,-380,-380};
   for(int i=0;i<6;++i)traffic[i].pose({lanes[i],0,starts[i]-int(1150*t)},0);
-  for(int i=0;i<2;++i){float delayed=t-(i?1.6f:.85f);auto chase=chaseLane(delayed);police[i].pose({int(lanePosition(delayed,chase))+(i?0:-40),0,i?-1750:-900},steeringYaw(laneVelocity(delayed,chase),1800),0,0,t);}
+  for(int i=0;i<2;++i){float delayed=t-(i?1.6f:.85f);auto chase=chaseLane(delayed);police[i].pose({int(lanePosition(delayed,chase))+(i?0:-40),0,i?-1750:-900},steeringYaw(laneVelocity(delayed,chase),chaseSpeed),0,0,t);}
   weather(t,true,car);
  }
- if(shot==8){road.advance(t*1800);car={0,int(55*clamp((t-2)/6)),0};float h=clamp((t-2)/6);camera.setPosition(lerp({-510,145,-650},{-570,165,-570},p));camera.lookAt(car+Vector3{50,90,20});hero.pose(car,0,h);for(int i=0;i<2;++i)police[i].pose({i?380:-380,0,-1000-i*500},0,0,0,t);}
- // Maintain the street's 1800-unit/s forward speed through the climb.
- // The tracking rig translates linearly with the car while the city stops.
- if(shot==9){road.advance(0);car={0,55+int(650*t),int(1800*t)};camera.setPosition({-650,260+int(580*t),1000+int(1800*t)});camera.lookAt(car+Vector3{40,60,0});hero.pose(car,0,1,1);for(int i=0;i<2;++i)police[i].pose({i?380:-380,0,-1000-i*500},0,0,0,.1f);}
- // A stationary camera is ahead of the flight path. The same velocity carries
- // the coupe up past the lens; hold on the city after it leaves, then fade.
- if(shot==10){car={0,3305+int(650*t),-3600+int(1800*t)};camera.setPosition({240,5250,1800});camera.lookAt(lerp({0,3305,-3600},{0,900,-3600},p));hero.pose(car,0,1,1);}
+ if(shot==8){road.advance(t*chaseSpeed);car={0,int(55*clamp((t-2)/6)),0};float h=clamp((t-2)/6);camera.setPosition(lerp({-510,145,-650},{-570,165,-570},p));camera.lookAt(car+Vector3{50,90,20});hero.pose(car,0,h);for(int i=0;i<2;++i)police[i].pose({i?380:-380,0,-1000-i*500},0,0,0,t);}
+ // Rebase the moving shot around the car. Road parallax still represents
+ // the full forward velocity; police remain at fixed world positions below.
+ if(shot==9){float travel=chaseSpeed*t;road.advance(travel,true);car={0,int(launchHeight(t)),0};camera.setPosition({-480,260+int(580*t),1000});camera.lookAt(car+Vector3{40,60,0});hero.pose(car,0,1,1,0,launchPitch(t));for(int i=0;i<2;++i)police[i].pose({i?380:-380,0,-1000-i*500-int(travel)},0,0,0,.1f);}
+ // Identical velocity and pitch across the final cut. The camera waits two
+ // seconds ahead of the flight path and clears the outboard wheel pods.
+ if(shot==10){float startY=launchHeight(durations[9]);car={0,int(startY+climbSpeed*t),int(chaseSpeed*(t-2))};camera.setPosition({260,int(startY+climbSpeed*2),0});camera.lookAt(lerp({0,int(startY),int(-chaseSpeed*2)},{0,0,-2000},p));hero.pose(car,0,1,1,0,launchPitch(durations[9]));}
  animateCity(t);
  for(size_t i=0;i<flicker.size();++i){float v=std::fmod(t*11+i*3.7f,13.f);flicker[i]->alpha=uint8_t(v<.45f?70:255);}
  if(water){auto v=camera.transformDirection(Vector3{0,0,1900}-camera.position);int32_t cx,sx,cy,sy,cz,sz;camera.getRotationMatrix(cx,sx,cy,sy,cz,sz);int horizon=renderHeight/2+int(sx*camera.fovFactor/1024.f);float shore=renderHeight/2-v.y*camera.fovFactor/v.z;water->waterYBias=uint8_t(std::clamp(int(2*(shore-horizon)),0,255));water->waterReflectionMaxY=int16_t(shore);scene->waterTime=t;}
- if(heroGlow>=0){glows[heroGlow].position=hero.position+yawed({-78,57,290},hero.heading);glows[heroGlow+1].position=hero.position+yawed({78,57,290},hero.heading);for(int i=0;i<4;++i)glows[heroGlow+2+i].position=hero.position+yawed({i%2?150:-150,35,i<2?-175:175},hero.heading);}
+ if(heroGlow>=0){glows[heroGlow].position=hero.worldPoint({-78,57,290});glows[heroGlow+1].position=hero.worldPoint({78,57,290});for(int i=0;i<4;++i)glows[heroGlow+2+i].position=hero.worldPoint({i%2?150:-150,35,i<2?-175:175});}
  projectGlows();
  if(shot==4||shot==5)for(auto& g:glows)g.sprite->enabled=g.sprite->enabled && shot==4 && g.sprite->y<renderHeight/2;
  if(heroGlow>=0){
-  auto facing=yawed({0,0,1024},hero.heading);auto view=camera.position-hero.position;
-  bool front=int64_t(facing.x)*view.x+int64_t(facing.z)*view.z>0;
+  auto facing=hero.direction({0,0,1024});auto view=camera.position-hero.position;
+  bool front=int64_t(facing.x)*view.x+int64_t(facing.y)*view.y+int64_t(facing.z)*view.z>0;
   for(int i=0;i<2;++i)glows[heroGlow+i].sprite->enabled=glows[heroGlow+i].sprite->enabled && front;
   for(int i=0;i<4;++i){auto* halo=glows[heroGlow+2+i].sprite;halo->enabled=halo->enabled && (shot>=9||(shot==8&&t>2));halo->material->alpha=shot>=9?220:uint8_t(180*clamp((t-2)/6));}
  }

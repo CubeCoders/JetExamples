@@ -8,7 +8,20 @@ struct CarPart {Object* object;Vector3 local;int kind;};
 struct Vehicle {
  std::vector<CarPart> parts;
  Material *metal=nullptr,*wheelGlow=nullptr;
- Vector3 position;float heading=0;
+ Vector3 position;float heading=0;int bodyPitch=0;
+ // Positive pitch raises the nose. Jet's X rotation uses the opposite sign.
+ Vector3 direction(Vector3 v)const{float a=bodyPitch*pi/180;return yawed({v.x,int(v.y*std::cos(a)+v.z*std::sin(a)),int(-v.y*std::sin(a)+v.z*std::cos(a))},heading);}
+ Vector3 worldPoint(Vector3 v)const{return position+direction(v);}
+ Vector3 wheelRotation(int spin,int roll)const{
+  if(!bodyPitch)return {spin,int(heading),roll};
+  // Compose body yaw/pitch with the pod hinge and wheel spin, then decompose
+  // to Jet's Rz*Ry*Rx order. Adding Euler angles would twist the hover pods.
+  float y=heading*pi/180,p=bodyPitch*pi/180,r=roll*pi/180,x=spin*pi/180;
+  float cy=std::cos(y),sy=std::sin(y),cp=std::cos(p),sp=std::sin(p),cr=std::cos(r),sr=std::sin(r),cx=std::cos(x),sx=std::sin(x);
+  float m00=cy*cr-sy*sp*sr,m10=cp*sr,m20=-sy*cr-cy*sp*sr;
+  float m21=sy*sr*cx-cy*sp*cr*cx+cy*cp*sx,m22=-sy*sr*sx+cy*sp*cr*sx+cy*cp*cx;
+  return {int(std::round(std::atan2(m21,m22)*180/pi)),int(std::round(std::asin(std::clamp(-m20,-1.f,1.f))*180/pi)),int(std::round(std::atan2(m10,m00)*180/pi))};
+ }
  void add(Object* o,Vector3 local={0,0,0},int kind=0){if(local.x==0&&local.y==0&&local.z==0)local=o->position;parts.push_back({o,local,kind});}
  void face(Object* o,Vector3 a,Vector3 b,Vector3 c,Vector3 d,Material* m,Vector3 outward){
   auto u=b-a,v=c-a;
@@ -146,15 +159,15 @@ struct Vehicle {
   if(lite)trafficBody(police,style);else heroBody(transformable);
   auto* shadow=panel({-116,3,-255},{116,3,-255},{116,3,255},{-116,3,255},bank.paint(0x070E1A));add(shadow,{},11);
  }
- void pose(Vector3 pos,float yaw,float hover=0,float fire=0,float blink=0){
-  position=pos;heading=yaw;wheelGlow->alpha=uint8_t(std::min(255.f,hover*190+fire*65));
+ void pose(Vector3 pos,float yaw,float hover=0,float fire=0,float blink=0,float pitch=0){
+  position=pos;heading=yaw;bodyPitch=int(std::round(pitch));wheelGlow->alpha=uint8_t(std::min(255.f,hover*190+fire*65));
   for(auto& p:parts){auto* o=p.object;Vector3 local=p.local;int roll=0;o->enabled=true;
    // Outboard faces rotate DOWN, with mirrored hinges on opposite sides.
    if(p.kind==2||p.kind==3){roll=int((p.kind==2?90:-90)*hover);local.x+=int((p.kind==2?-28:28)*hover);local.y+=int(10*hover);}
    if(p.kind==5||p.kind==6)o->enabled=(int(blink*8)%2)==(p.kind==5?0:1);
-   o->setPosition(pos+yawed(local,yaw));o->setRotation((p.kind==2||p.kind==3)?int(wheelPhase):0,int(yaw),roll);
-   if(p.kind==11){o->position.y=0;o->enabled=pos.y<500;}
-   if(p.kind==1){for(size_t i=0;i<o->vertices.size();++i){auto& v=o->vertices[i];v.uv=environmentReflectionUV(pos+yawed(v.position,yaw),yawed(v.normal,yaw),camera.position);if(i%4)v.uv.x=unwrapEnvironmentU(v.uv.x,o->vertices[i-i%4].uv.x);}}
+   o->setPosition(worldPoint(local));o->setRotation((p.kind==2||p.kind==3)?wheelRotation(int(wheelPhase),roll):Vector3{-bodyPitch,int(yaw),0});
+   if(p.kind==11){o->setRotation(0,int(yaw),0);o->position.y=0;o->enabled=pos.y<500;}
+   if(p.kind==1){for(size_t i=0;i<o->vertices.size();++i){auto& v=o->vertices[i];v.uv=environmentReflectionUV(worldPoint(v.position),direction(v.normal),camera.position);if(i%4)v.uv.x=unwrapEnvironmentU(v.uv.x,o->vertices[i-i%4].uv.x);}}
   }
  }
 };
