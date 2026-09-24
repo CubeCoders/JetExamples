@@ -58,7 +58,8 @@ was flashed on COM6 and completed all eleven cuts, the black hold and intentiona
 reboot, with no captured panic or heap error. The lowest reported internal free
 heap at a scene boundary was about 18 KiB, with a 17 KiB largest block.
 
-Mean sampled cadence compares the sealed-car revision with the revised cockpit,
+Before the lens-animation pass below, mean sampled cadence compared the sealed-car
+revision with the revised cockpit,
 calibrated MPH movement, sign clearance and pitched flight. These are serial
 window means, not per-frame minima; windows can straddle cuts.
 
@@ -119,3 +120,27 @@ live local reflections. Glow sprites have no general scene occlusion. Street
 draw distance is 9,000 units, with 3,200-unit facade LOD and 8 KiB of persistent
 filtered facade textures in internal DRAM. Large scene allocations prefer PSRAM.
 P4 configuration exists but this film has only been run on S3 hardware.
+
+
+## Animated lens pass
+
+Three linear field-of-view pulls add optical zoom to the existing camera paths:
+the gauge narrows from 62 to 46 degrees over five seconds, the launch widens
+from 54 to 70 over five seconds, and the final approach opens from 34 to 68
+over two seconds. The final lens then holds through the fly-by and fade. The
+car's MPH and trajectory remain unchanged. These use the floating-point camera
+API; they add no depth-of-field blur pass or image allocation.
+
+All eight native tests pass, and all 2,021 normal/reference frame hashes match
+with the animated projections. The existing near-plane clearance envelope
+still covers these lenses, which are narrower than the film's 74-degree maximum.
+
+The lens revision was flashed on COM6 and completed all eleven cuts and the
+intentional restart without a captured panic or heap error. Sample means for
+the gauge, launch and final cut were 56.5, 40.9 and 55.8 fields/s respectively;
+the overall 50 fields/s minimum remains unmet. No image buffer was added.
+
+The updated full-quality video decodes to 6,120 frames at 1920×1280 and 60 fps;
+unchanged sequences reuse the preceding export. A separate 19-second review
+joins the gauge, takeoff and fly-by and decodes to 1,140 frames. Neither video's
+playback rate represents the S3's measured speed.

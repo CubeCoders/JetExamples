@@ -32,8 +32,10 @@ speed of 88 MPH while climbing at 650 world units/s. Its nose follows the
 flight direction, including the hinged wheels, window reflections and glow sprites. The final camera
 waits ahead of its flight path, letting the coupe pass close to the lens before
 tilting down over the city and fading out. Road sections recycle around the tracking camera. The
-framing uses offset subjects and diagonal street lines, with a fixed lens per
-cut rather than a uniform centred composition.
+framing uses offset subjects and diagonal street lines, with lenses chosen per cut. Linear field-of-view changes tighten
+the 70–88 MPH gauge insert from 62° to 46°, widen the launch from 54° to 70°,
+and pull the final approach from 34° to 68° before the car passes the lens.
+These projection changes add no blur pass or depth-of-field buffer.
 
 The 570-unit coupe represents a 4.5-metre car: 70 MPH is 6.95 car lengths
 per second and 88 MPH is 8.74. Road parallax and wheel rotation use the same

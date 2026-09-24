@@ -12,6 +12,15 @@
 namespace Film {
 inline constexpr float durations[]={12,10,7,9,9,6,11,14,10,5,8};
 inline constexpr float duration=101;
+// Linear lens pulls accent the gauge, launch and final approach. This changes
+// projection without adding a depth-of-field buffer or moving the camera rig.
+inline float shotLens(int cut,float local){
+ if(cut==5)return 62-16*clamp(local/5.f);
+ if(cut==9)return 54+16*clamp(local/5.f);
+ if(cut==10)return 34+34*clamp(local/2.f);
+ constexpr float lenses[]={62,68,62,74,74,48,62,62,56,64,68};
+ return lenses[cut];
+}
 inline const char* names[]={"THE RIVER","RAIN DISTRICT","THE COURIER","REAR VIEW","NO DRIVER","EIGHTY EIGHT","BOULEVARD","PURSUIT","FLIGHT MODE","IGNITION","ABOVE IT ALL"};
 inline float time=0,shotTime=0;
 inline int shot=-1;
@@ -79,9 +88,7 @@ inline void load(int which){
  heap_caps_malloc_extmem_enable(128);
 #endif
  shot=which;prepareFarFacades();scene->lodScale=(which>=1&&which<=9)?3200:0;
- // Fixed lenses per cut: wider inside the narrow lane, tighter on the wheel transformation.
- constexpr float lenses[]={62,68,62,74,74,48,62,62,56,64,68};
- camera.setFOV(lenses[which],renderWidth);camera.nearPlane=40;camera.farPlane=(which>=1&&which<=9)?9000:15000;
+ camera.setFOV(shotLens(which,0),renderWidth);camera.nearPlane=40;camera.farPlane=(which>=1&&which<=9)?9000:15000;
  for(int y=0;y<renderHeight;++y)sky[y]=rgb(((10+y*15/renderHeight)<<16)|((15+y*22/renderHeight)<<8)|(34+y*40/renderHeight));
  if(shot==0){skyline();}
  else if(shot==1){street(320,14,true,7);}
@@ -118,6 +125,7 @@ inline void weather(float t,bool debris,Vector3 origin={0,0,0}){
 }
 inline void pose(float p){
  Vector3 car{0,0,0};float yaw=0;const float t=shotTime;
+ const float lens=shotLens(shot,t);if(camera.fov!=lens)camera.setFOV(lens,renderWidth);
  float wheelTravel=t*(shot<6?roadSpeed:chaseSpeed);
  if(shot==6)wheelTravel=chaseSpeed*std::min(t,turnStart)+turnRadius*pi/2*clamp((t-turnStart)/(turnEnd-turnStart))+chaseSpeed*std::max(0.f,t-turnEnd);
  if(shot==8){float braking=std::min(6.f,std::max(0.f,t-2));wheelTravel=chaseSpeed*(std::min(t,2.f)+braking-braking*braking/12);}
