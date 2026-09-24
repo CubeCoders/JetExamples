@@ -16,7 +16,7 @@ int main(int argc,char** argv){
  _setmode(_fileno(stdout),_O_BINARY);
 #endif
  constexpr size_t guard=64;constexpr uint16_t sentinel=0xA55A;
- std::vector<uint16_t> a(count+guard*2,sentinel),b(count+guard*2,sentinel),depth(count+guard*2,sentinel);
+ std::vector<uint16_t> a(count+guard*2,sentinel),b(count+guard*2,sentinel),depth(count+guard*2,sentinel),composed(count+guard*2,sentinel);
  std::vector<unsigned char> rgb(count*3);
  Renderer::Scene scene(a.data()+guard,depth.data()+guard,w,h);Film::init(scene);
  for(int frame=0;frame<int(seconds*60);++frame){
@@ -35,11 +35,14 @@ int main(int argc,char** argv){
    Film::water->waterYBias=0;
   }
   scene.rasterizeBand(0,h);++scene.frameCounter;Film::effects(scene);
-  // Match the firmware ordering: geometry, particles, then glow/fade overlays.
+  // Like firmware scanout, overlays never enter the next reflection source.
+  // Otherwise water mirrors credits/fades and accumulates sprite halos.
+  auto* present=composed.data()+guard;std::copy(write,write+count,present);
+  // Geometry and particles, then glow/fade overlays on the presentation copy.
   auto sprites=scene.getSprites();std::stable_sort(sprites.begin(),sprites.end(),[](auto* a,auto* b){return a->zOrder<b->zOrder;});
-  for(int y=0;y<h;++y)Renderer::compositeSprites(write+y*w,w,y,sprites.data(),int(sprites.size()));
-  for(auto* buffer:{&a,&b,&depth})for(size_t i=0;i<guard;++i)if((*buffer)[i]!=sentinel||(*buffer)[count+guard+i]!=sentinel){std::fprintf(stderr,"Frame buffer guard overwritten at frame %d\n",frame);return 2;}
-  for(int i=0;i<count;++i){auto p=write[i];rgb[i*3]=((p>>11)&31)*255/31;rgb[i*3+1]=((p>>5)&63)*255/63;rgb[i*3+2]=(p&31)*255/31;}
+  for(int y=0;y<h;++y)Renderer::compositeSprites(present+y*w,w,y,sprites.data(),int(sprites.size()));
+  for(auto* buffer:{&a,&b,&depth,&composed})for(size_t i=0;i<guard;++i)if((*buffer)[i]!=sentinel||(*buffer)[count+guard+i]!=sentinel){std::fprintf(stderr,"Frame buffer guard overwritten at frame %d\n",frame);return 2;}
+  for(int i=0;i<count;++i){auto p=present[i];rgb[i*3]=((p>>11)&31)*255/31;rgb[i*3+1]=((p>>5)&63)*255/63;rgb[i*3+2]=(p&31)*255/31;}
   if(std::fwrite(rgb.data(),1,rgb.size(),stdout)!=rgb.size())return 1;
   if(frame%600==0)std::fprintf(stderr,"Quality render %.1f / %.1f seconds\n",frame/60.f,seconds);
  }

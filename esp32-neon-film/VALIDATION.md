@@ -102,7 +102,9 @@ are below the target. Physical LCD rows update at half the field rate.
 The S3-matched export reconstructs 480×320 packed fields into 960×640 video.
 Desktop quality renders full 2880×1920 RGB565 colour and depth buffers, with
 bilinear perspective textures and full-detail meshes, then downsamples to
-1920×1280. It checks guards around both colour buffers and depth every frame.
+1920×1280. It checks guards around both scene buffers, the presentation buffer and depth
+every frame. Overlays compose onto the presentation copy, so water never samples
+credit text or a previous fade. This matches hardware scanout separation.
 Neither export fabricates hardware FPS, and both are silent visual reviews.
 
 Each final export contains 7,020 frames: 117 seconds at 60 fps. Both videos have passed a complete decode, with contact sheets inspected for
