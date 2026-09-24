@@ -49,6 +49,11 @@ the pistons outside their sweep. Counterweight's cubes rotate below the lintels
 and inside the columns. Quicksilver's suspended assembly clears its plinth, and
 its beads orbit between the deformed core and the inner hoop. These clearances
 are authored into the motion; they do not depend on enabling a depth buffer.
+Colour in Space separates the rotating bars behind the rings, with the spheres
+and rising slats in front; all solid pairs stay clear throughout the animation.
+The Gyre's golden knot uses low ambient fill and a strong directional key for
+curved shading and moving Phong highlights. Its outward face winding matches
+the smooth lighting normals, as does the porcelain knot in the finale.
 
 For a desktop-quality export, build `tests/quality` into `build-quality` and
 pass `--quality` to the video tool. That target uses full 2880×1920 colour and

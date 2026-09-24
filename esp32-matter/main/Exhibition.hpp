@@ -215,12 +215,12 @@ inline void colourSpace() {
                        i == 0   ? blue
                        : i == 1 ? yellow
                                 : red,
-                       {-310 + i * 300, -120 + i % 2 * 250, i % 2 ? 100 : -150});
+                       {-420 + i * 420, i == 1 ? 240 : -30, -100});
         o->rotation = {90, 0, i * 40};
         item(o, 0, float(i));
     }
     for (int i = 0; i < 15; ++i) {
-        auto *o = box({(i - 7) * 77, -250, 100}, {51, 290, 65},
+        auto *o = box({(i - 7) * 77, -250, 310}, {51, 290, 65},
                       i % 3 == 0   ? blue
                       : i % 3 == 1 ? red
                                    : yellow);
@@ -230,8 +230,8 @@ inline void colourSpace() {
         auto *o = sphere(65, 12, ivory);
         item(o, 2, float(i));
     }
-    box({-550, -200, 260}, {60, 430, 90}, black);
-    box({550, -200, -260}, {60, 430, 90}, black);
+    box({-650, -200, 200}, {60, 430, 90}, black);
+    box({650, -200, 200}, {60, 430, 90}, black);
     for (int i = 0; i < 4; ++i) {
         auto *o = box({0, 0, 0}, {540, 20, 30}, black);
         item(o, 3, float(i));
@@ -300,7 +300,11 @@ inline void reliquary() {
 }
 inline void gyre() {
     gradient(0x2B333A, 0x948572);
-    ambient.color = {128, 113, 93};
+    // The tunnel is unlit. A low fill and a broad side key model the knot
+    // independently of the graphic ceramic backdrop.
+    ambient.color = {48, 43, 38};
+    light.updateDirection({235, 32, 0});
+    light.intensity = 255;
     auto *clay = bank.paint(0xB56848, ShadingMode::UNLIT);
     auto *blue = bank.paint(0x507F8A, ShadingMode::UNLIT);
     auto *cream = bank.paint(0xCDBB95, ShadingMode::UNLIT);
@@ -322,12 +326,18 @@ inline void gyre() {
         o->position.z = i * 220;
         item(o, 0, float(i));
     }
-    auto *core = knot(125, 32, 40, 6, glossy(0xF4D28B));
+    auto *gold = glossy(0xF4D28B);
+    gold->diffuse = 225;
+    gold->specular = 235;
+    gold->specularExponent = 20;
+    auto *core = knot(125, 32, 40, 6, gold);
     item(core, 1);
 }
 inline void assembly() {
     gradient(0x25342F, 0x8B9781);
-    ambient.color = {124, 128, 106};
+    ambient.color = {100, 107, 93};
+    light.updateDirection({60, 35, 0});
+    light.intensity = 235;
     auto *porcelain = glossy(0xE6DBC1);
     auto *orange = bank.paint(0xC26635);
     auto *blue = bank.paint(0x456A85);
@@ -497,22 +507,26 @@ inline void pose(float t) {
         }
     }
     if (chapter == 4) {
-        orbit(-.5f + t * .075f, 1150, 430 - 150 * p, {0, -40, 0});
+        orbit(-.5f + t * .075f, 1470, 430 - 150 * p, {0, 25, 0});
         for (auto &i : items) {
             if (i.kind == 0) {
                 i.o->rotation = {90, int(t * 47 + i.phase * 35), int(i.phase * 35)};
-                i.o->position.y = i.base.y + int(70 * std::sin(t * 1.3f + i.phase));
+                i.o->position.y = i.base.y + int(35 * std::sin(t * 1.3f + i.phase));
             } else if (i.kind == 1) {
                 i.o->scale = {1024, int(1024 + 600 * std::sin(t * 1.6f + i.phase * .6f)), 1024};
                 i.o->transformScale = true;
                 i.o->position.y = -400 + i.o->scale.y * 145 / 1024;
             } else if (i.kind == 2) {
                 float a = t * .75f + i.phase * tau / 5;
-                i.o->position = {int(400 * std::cos(a)), int(80 + 210 * std::abs(std::sin(a))),
-                                 int(360 * std::sin(a))};
+                // Independent pendulums above the foreground slats, ahead of
+                // the rings' full rotation envelope.
+                i.o->position = {int(-400 + 200 * i.phase), int(240 + 50 * std::sin(a)),
+                                 int(300 + 25 * std::cos(a))};
             } else {
-                i.o->position = {0, int(200 + i.phase * 44), 0};
-                i.o->rotation = {0, int(t * 46 + i.phase * 40), int(12 * std::sin(i.phase))};
+                // The whole bar sweep is behind the rings. Separate heights
+                // keep the four bars from intersecting one another as well.
+                i.o->position = {0, int(250 + i.phase * 50), -670};
+                i.o->rotation = {0, int(t * 46 + i.phase * 40), 0};
             }
         }
     }

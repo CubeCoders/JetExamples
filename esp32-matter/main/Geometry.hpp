@@ -226,7 +226,9 @@ inline Object *knot(float radius, float tube, int segments, int sides, Material 
     for (int i = 0; i < segments; ++i)
         for (int j = 0; j < sides; ++j) {
             int a = i * (sides + 1) + j, b = a + sides + 1;
-            o->addFace(a, b, b + 1, a + 1, material);
+            // The normal frame is (n, tangent x n); traverse the tube section
+            // before the path so face winding agrees with the outward normals.
+            o->addFace(a, a + 1, b + 1, b, material);
         }
     return bank.finish(o);
 }

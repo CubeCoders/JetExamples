@@ -14,21 +14,21 @@ nearest textures, a parallel raster worker and painter ordering without depth.
 
 | Movement | Mean fields/s | Reporting-window range |
 |---|---:|---:|
-| Pressure | 35.9 | 31.7–39.2 |
+| Pressure | 35.8 | 31.6–39.0 |
 | Counterweight | 48.8 | 35.7–60.0 |
-| Paper Weather | 41.0 | 39.3–42.3 |
-| Quicksilver | 37.8 | 34.9–39.5 |
-| Colour In Space | 36.1 | 35.0–36.8 |
-| Botanica | 56.3 | 41.2–59.8 |
-| Interference | 43.2 | 41.3–45.2 |
-| Reliquary | 50.3 | 40.5–52.7 |
-| The Gyre | 53.1 | 42.2–54.9 |
-| Matter | 37.2 | 35.8–39.3 |
+| Paper Weather | 40.9 | 38.8–42.2 |
+| Quicksilver | 37.6 | 33.8–39.3 |
+| Colour In Space | 41.2 | 36.7–42.3 |
+| Botanica | 56.0 | 40.9–59.7 |
+| Interference | 43.4 | 40.8–47.6 |
+| Reliquary | 50.1 | 41.3–52.7 |
+| The Gyre | 51.6 | 43.6–53.8 |
+| Matter | 35.4 | 34.3–37.5 |
 
 Lowest reported internal free memory at a scene boundary: 17,855 bytes.
-Application binary: 403,872 bytes. This is inspired by 64K intros,
+Application binary: 403,744 bytes. This is inspired by 64K intros,
 not a 64K size-constrained executable. Binary SHA-256:
-`198c227ae2ca2b5552f6d70fbb04bba0cb17f62518325ebea2b9432b4adeb7fb`.
+`04dedac6235664f18bbcedc10fa1e77a2694ada5e9079db80645b301e2f0d336`.
 
 The broad aim is 35–60 fields/s. A few reporting windows still fall into the low
 30s; this is documented rather than presenting a guaranteed minimum cadence.
@@ -44,11 +44,15 @@ The broad aim is 35–60 fields/s. A few reporting windows still fall into the l
   full 2880×1920 colour/depth buffers and intact guard regions.
 - Inspected S3-layout frames throughout every movement, including the pale
   scenes' dark captions, the faster object rotations and readable final card.
-- Rechecked the revised Pressure, Counterweight, Quicksilver, Interference and
-  Gyre compositions at six points throughout each movement.
+- Rechecked the revised compositions at six points throughout each movement,
+  including Colour in Space, the Gyre and the finale after the lighting fix.
 - Swept the revised collision-sensitive motion at 60 Hz. Conservative minimum
   clearances in scene units: gears/rings 11.83, opening rings/plinth 47.91,
   cubes/architecture 36.81, chrome rings/plinth 34.74, knot/tunnel bore 7.66.
+- Swept every solid pair in Colour in Space at 60 Hz: minimum conservative
+  separation 27.00 scene units. Ground and its planar shadow are excluded.
+- Added and passed a regression check that both closed knots' face winding
+  agrees with their smooth outward normals: 480 and 576 faces respectively.
 - Fully decoded the final S3-quality MP4: 10,860 frames, 181 seconds, 60 Hz,
   960×640 nearest upscale from 480×320 reconstructed alternating fields.
 
@@ -69,6 +73,9 @@ normals, and shared wave coordinates need only 41 samples per frame. The liquid
 surface separates spatial and temporal sine bases, using six trigonometric
 evaluations per frame while retaining analytical normals. Reflection transforms
 are calculated once per object; rings and tunnel profiles use compact geometry.
+The Gyre's low ambient fill and directional key light its golden knot while the
+tunnel remains unlit. Its closed knot and the final porcelain knot now cull the
+interior faces consistently with their authored smooth lighting normals.
 
 Painter sorting still approximates intersecting surfaces. The room texture is
 a procedural environment-map illusion, not a live reflection. Whole-degree mesh

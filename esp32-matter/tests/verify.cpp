@@ -12,6 +12,22 @@ int main() {
             assert(sizes[c] == Matter::bank.objects.size());
             assert(Matter::chapter == c);
             assert(f.target.getSprites().size() == 2 + Matter::glows.size());
+            // Both uses of the closed knot must cull the inward-facing side,
+            // leaving the hemisphere whose smooth normals face the camera.
+            if (c == 8 || c == 9)
+                for (auto &item : Matter::items)
+                    if (item.kind == (c == 8 ? 1 : 0))
+                        for (auto &tri : item.o->triangles) {
+                            auto &a = item.o->vertices[tri.v1];
+                            auto &b = item.o->vertices[tri.v2];
+                            auto &d = item.o->vertices[tri.v3];
+                            auto face =
+                                (Matter::vector(b.position) - Matter::vector(a.position))
+                                    .cross(Matter::vector(d.position) - Matter::vector(a.position));
+                            auto normal = Matter::vector(a.normal) + Matter::vector(b.normal) +
+                                          Matter::vector(d.normal);
+                            assert(face.x * normal.x + face.y * normal.y + face.z * normal.z > 0);
+                        }
             auto original = f.out;
             f.render(c * 18 + 5);
             if (original != f.out) {
