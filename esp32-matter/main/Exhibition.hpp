@@ -88,35 +88,33 @@ inline void pressure() {
     gradient(0x111B1D, 0x657169);
     ambient.color = {91, 99, 97};
     light.updateDirection({50, 40, 0});
-    auto *steel = bank.paint(0xB9A47E, ShadingMode::GOURAUD);
-    auto *edge = bank.paint(0xB6C4BC, ShadingMode::GOURAUD);
+    auto *steel = glossy(0xC9AA72);
+    auto *edge = glossy(0xC6D1CB);
+    steel->specular = edge->specular = 210;
+    steel->specularExponent = edge->specularExponent = 42;
+    auto *rim = bank.paint(0xB6C4BC, ShadingMode::GOURAUD);
     auto *red = bank.paint(0xC75227, ShadingMode::GOURAUD);
-    floor(bank.paint(0x303C39), bank.paint(0x35433E), 2800, 8);
-    shadow(590);
+    floor(bank.paint(0x303C39), bank.paint(0x35433E), 2800, 8, -470);
+    shadow(685, -467);
     for (int i = 0; i < 3; ++i) {
-        auto *o = gear(i == 0 ? 260 : 180, i == 0 ? 10 : 8, steel, edge);
-        o->position = {i == 0   ? -85
-                       : i == 1 ? 294
-                                : -376,
-                       i == 0   ? 40
-                       : i == 1 ? 195
-                                : -92,
-                       i == 0 ? 0 : 40};
+        auto *o = gear(i == 0 ? 210 : 130, i == 0 ? 10 : 8, steel, edge);
+        o->position = {i == 0 ? 0 : i == 1 ? 270 : -270, i == 0 ? 235 : -5, i == 0 ? 0 : 20};
         item(o, i == 0 ? 1 : -1, i * 31.f);
     }
     for (int i = 0; i < 8; ++i) {
         float a = tau * i / 8;
         auto *o = cylinder(32, 100, 8, red);
-        aim(o, {std::cos(a) * 430, -360, std::sin(a) * 430},
-            {std::cos(a) * 430, 220, std::sin(a) * 430});
+        aim(o, {std::cos(a) * 620, -430, std::sin(a) * 620},
+            {std::cos(a) * 620, 0, std::sin(a) * 620});
         item(o, 2, float(i));
     }
     for (int i = 0; i < 3; ++i) {
-        auto *o = ring(450 + i * 34, 12, 24, 4, i % 2 ? red : edge);
+        // Disjoint concentric shells enclose the gears at every orientation.
+        auto *o = ring(485 + i * 34, 12, 32, 4, i % 2 ? red : rim, {0, 180, 0});
         o->rotation = {65, i * 25, 0};
         item(o, 3, float(i));
     }
-    cylinder(590, 36, 40, bank.paint(0x53645B), {0, -405, 0});
+    cylinder(680, 36, 40, bank.paint(0x53645B), {0, -450, 0});
     addGlow({-300, 280, 200});
     addGlow({310, -150, -100});
 }
@@ -139,7 +137,9 @@ inline void counterweight() {
             item(lintel, 1, float(i) * .49f + side);
         }
     for (int i = 0; i < 10; ++i) {
-        auto *o = box({i % 2 ? 360 : -360, 90 + i % 2 * 250, 700 + i * 650}, {200, 200, 200},
+        // The complete rotating cube stays below the lintel's lowest position
+        // and inside the columns, leaving the central camera aisle clear.
+        auto *o = box({i % 2 ? 400 : -400, -100 + i % 2 * 30, 700 + i * 650}, {200, 200, 200},
                       i % 2 ? clay : ochre);
         item(o, 2, float(i));
     }
@@ -182,15 +182,16 @@ inline void quicksilver() {
     shadow(500);
     auto *chrome = bank.texture(&room);
     blob.build(chrome, 20);
+    blob.object->position.y = 160;
     reflective.push_back(blob.object);
     auto *porcelain = glossy(0xE5D6AB);
     for (int i = 0; i < 2; ++i) {
-        auto *o = ring(390 + i * 85, 16, 32, 5, porcelain);
+        auto *o = ring(415 + i * 75, 16, 32, 5, porcelain, {0, 160, 0});
         o->rotation = {i * 56 + 25, i * 43, 0};
         item(o, 0, float(i));
     }
     for (int i = 0; i < 3; ++i) {
-        auto *o = sphere(55 + i % 2 * 20, 10, chrome);
+        auto *o = sphere(42 + i % 2 * 5, 10, chrome);
         item(o, 1, float(i));
         reflective.push_back(o);
     }
@@ -271,7 +272,7 @@ inline void interference() {
     for (int i = 0; i < 3; ++i)
         ribbon(72, 3000, 65, float(i) * tau / 3, i == 1 ? red : ivory, ink);
     for (int i = 0; i < 9; ++i) {
-        auto *o = sphere(42, 10, i % 3 ? ivory : red);
+        auto *o = sphere(55, 10, i % 3 ? ivory : red);
         item(o, 0, float(i));
     }
 }
@@ -321,7 +322,7 @@ inline void gyre() {
         o->position.z = i * 220;
         item(o, 0, float(i));
     }
-    auto *core = knot(110, 28, 32, 5, glossy(0xDFBD63));
+    auto *core = knot(125, 32, 40, 6, glossy(0xF4D28B));
     item(core, 1);
 }
 inline void assembly() {
@@ -427,13 +428,13 @@ inline void pose(float t) {
     float p = t / 18;
     if (chapter == 0) {
         orbit(.12f + t * .065f, 1460 - 130 * std::sin(t * .18f), 250 + 90 * std::sin(t * .23f),
-              {0, -25, 0});
+              {0, 150, 0});
         for (auto &i : items) {
             if (i.kind == 1 || i.kind == -1)
                 i.o->rotation.z = int(t * 48 * i.kind + i.phase);
             else if (i.kind == 2) {
                 i.o->scale.y = int(2800 + 1700 * std::sin(t * 1.8f + i.phase));
-                i.o->position.y = -250 + i.o->scale.y * 50 / 1024;
+                i.o->position.y = -430 + i.o->scale.y * 50 / 1024;
             } else {
                 i.o->rotation.x = int(65 + i.phase * 8);
                 i.o->rotation.z = int(t * 42 * (int(i.phase) % 2 ? -1 : 1));
@@ -450,7 +451,7 @@ inline void pose(float t) {
             else {
                 i.o->rotation = {int(t * 42 + i.phase * 17), int(t * 53 + i.phase * 29),
                                  int(t * 37)};
-                i.o->position.y = i.base.y + int(110 * std::sin(t * 1.5f + i.phase));
+                i.o->position.y = i.base.y + int(60 * std::sin(t * 1.5f + i.phase));
             }
         }
     }
@@ -479,7 +480,8 @@ inline void pose(float t) {
         }
     }
     if (chapter == 3) {
-        orbit(-.55f + t * .075f, 1240 + 80 * std::sin(t * .32f), 185 + 100 * std::sin(t * .27f));
+        orbit(-.55f + t * .075f, 1370 + 80 * std::sin(t * .32f), 185 + 100 * std::sin(t * .27f),
+              {0, 100, 0});
         blob.pose(t);
         blob.object->rotation = {int(t * 38), int(t * 47), 0};
         for (auto &i : items) {
@@ -488,8 +490,9 @@ inline void pose(float t) {
                                  int(t * 37)};
             } else {
                 float a = t * .75f + i.phase * tau / 3;
-                i.o->position = {int(395 * std::cos(a)), int(140 * std::sin(a * 1.7f)),
-                                 int(395 * std::sin(a))};
+                // Beads stay between the deformed core and the inner hoop.
+                i.o->position = {int(330 * std::cos(a)), int(160 + 65 * std::sin(a * 1.7f)),
+                                 int(330 * std::sin(a))};
             }
         }
     }
@@ -533,13 +536,13 @@ inline void pose(float t) {
     }
     if (chapter == 6) {
         camera.setPosition(
-            {int(160 * std::sin(t * .29f)), int(110 * std::cos(t * .24f)), -2600 + int(160 * p)});
+            {int(85 * std::sin(t * .29f)), int(65 * std::cos(t * .24f)), -2420 + int(200 * p)});
         camera.lookAt({0, 0, 400});
         poseRibbons(t);
         for (auto &i : items) {
             float a = t * .65f + i.phase;
-            i.o->position = {int(350 * std::sin(a)), int(280 * std::cos(a * 1.3f)),
-                             int(-1100 + i.phase * 270)};
+            i.o->position = {int(110 * std::sin(a)), int(100 * std::cos(a)),
+                             int(-1250 + i.phase * 300)};
         }
     }
     if (chapter == 7) {
@@ -573,7 +576,9 @@ inline void pose(float t) {
                                  int(40 * std::cos(z * .0025f + t * .5f)), int(z) - 300};
                 i.o->rotation.z = int(i.phase * 13 + t * 42 + 8 * std::sin(t * 1.3f + i.phase));
             } else {
-                i.o->position.z = 2600;
+                // A foreground sculpture inside the clear bore, rather than a
+                // tiny mark at the vanishing point. Tunnel profiles pass around it.
+                i.o->position.z = 500;
                 i.o->rotation = {int(t * 38), int(t * 51), 0};
             }
         }

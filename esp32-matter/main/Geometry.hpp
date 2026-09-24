@@ -230,8 +230,9 @@ inline Object *knot(float radius, float tube, int segments, int sides, Material 
         }
     return bank.finish(o);
 }
-// Variable-depth industrial annulus. Teeth, chamfers and the centre opening
-// share ring boundaries; no coincident box teeth and no hidden centre disk.
+// Variable-depth industrial annulus. Two rounded bevel bands have continuous
+// normals across both their profile and the tooth outline, while the broad
+// front/back faces and tooth walls stay flat. Phong catches the curved lip.
 inline Object *gear(int radius, int teeth, Material *front, Material *edge) {
     auto *o = bank.mesh();
     int n = teeth * 4;
@@ -240,13 +241,32 @@ inline Object *gear(int radius, int teeth, Material *front, Material *edge) {
         float a = tau * i / n;
         return V{r * std::cos(a), r * std::sin(a), z};
     };
+    auto outer = [&](int i) { return radius * (((i % n + n) % n % 4 < 2) ? 1.f : .89f); };
+    auto radial = [&](int i) {
+        V previous = pt(i, outer(i), 0) - pt(i - 1, outer(i - 1), 0);
+        V next = pt(i + 1, outer(i + 1), 0) - pt(i, outer(i), 0);
+        return (V{previous.y, -previous.x, 0}.unit() + V{next.y, -next.x, 0}.unit()).unit();
+    };
     for (int i = 0; i < n; ++i) {
-        float a = radius * ((i % 4 < 2) ? 1.f : .89f),
-              b = radius * (((i + 1) % 4 < 2) ? 1.f : .89f);
-        quad(o, pt(i, inner, 26), pt(i, a - 8, 26), pt(i + 1, b - 8, 26), pt(i + 1, inner, 26),
+        float a = outer(i), b = outer(i + 1);
+        quad(o, pt(i, inner, 26), pt(i, a - 14, 26), pt(i + 1, b - 14, 26), pt(i + 1, inner, 26),
              front);
-        quad(o, pt(i, a - 8, 26), pt(i, a, 15), pt(i + 1, b, 15), pt(i + 1, b - 8, 26), edge);
-        quad(o, pt(i, a, 15), pt(i, a, -26), pt(i + 1, b, -26), pt(i + 1, b, 15), edge);
+        for (int band = 0; band < 2; ++band) {
+            float u = band * pi / 4, v = (band + 1) * pi / 4;
+            int k = int(o->vertices.size());
+            quad(o, pt(i, a - 14 + 14 * std::sin(u), 12 + 14 * std::cos(u)),
+                 pt(i, a - 14 + 14 * std::sin(v), 12 + 14 * std::cos(v)),
+                 pt(i + 1, b - 14 + 14 * std::sin(v), 12 + 14 * std::cos(v)),
+                 pt(i + 1, b - 14 + 14 * std::sin(u), 12 + 14 * std::cos(u)), edge);
+            o->vertices[k].normal = (radial(i) * std::sin(u) + V{0, 0, std::cos(u)}).integer(1024);
+            o->vertices[k + 1].normal =
+                (radial(i) * std::sin(v) + V{0, 0, std::cos(v)}).integer(1024);
+            o->vertices[k + 2].normal =
+                (radial(i + 1) * std::sin(v) + V{0, 0, std::cos(v)}).integer(1024);
+            o->vertices[k + 3].normal =
+                (radial(i + 1) * std::sin(u) + V{0, 0, std::cos(u)}).integer(1024);
+        }
+        quad(o, pt(i, a, 12), pt(i, a, -26), pt(i + 1, b, -26), pt(i + 1, b, 12), edge);
         quad(o, pt(i + 1, inner, -26), pt(i + 1, b, -26), pt(i, a, -26), pt(i, inner, -26), front);
         quad(o, pt(i + 1, inner, 26), pt(i + 1, inner, -26), pt(i, inner, -26), pt(i, inner, 26),
              edge);
