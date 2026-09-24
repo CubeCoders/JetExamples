@@ -73,6 +73,7 @@ Implemented: [Utah teapot lighting](esp32-lighting-teapot/README.md) and
 [After Hours blending tricks](esp32-sprites-blending/README.md), and
 [Air Mail sprite controls](esp32-sprite-controls/README.md), and
 [Woodland mesh LOD and billboards](esp32-lod-billboards/README.md), and
+[REPEAT shared mesh instancing](esp32-mesh-instancing/README.md), and
 [ESP 88, the twelve-scene cinematic](esp32-neon-film/README.md) (in review).
 Each showcase is reviewed on hardware before the next is started.
 
