@@ -8,8 +8,8 @@ target is not yet met. Do not present the 60 fps export as a hardware benchmark.
 
 - ESP-IDF S3 build and COM6 flash; multiple full eleven-cut loops followed by
   the deliberate black-hold restart. No earlier reset in those captured runs.
-- Native seven-test suite: complete film, offscreen clipping, unlit spans,
-  texture options, water reflection, extended painter buckets and minimal FPS overlay.
+- Native eight-test suite: complete film, offscreen clipping, unlit spans,
+  texture options, water reflection, extended painter buckets, minimal FPS overlay and closed vehicle geometry.
 - 2,021 timeline poses at 20 Hz, guarded packed field buffers, camera/building
   clearance and camera-to-car sightline checks, hero/traffic and police/traffic oriented-box
   overlap checks, clearance from camera rigs to vehicle bodies, three complete scene ownership cycles and black end fade.
@@ -109,3 +109,60 @@ These are serial window means, not per-frame minima; windows may straddle cuts.
 The extended view remains more expensive than the earlier short streets.
 The 50 fields/s minimum is still unmet, particularly in rain, cockpit and
 front tracking; the fixed-60 native video is solely a visual review artifact.
+
+
+## Sealed coupe, fly-by and desktop-quality export
+
+The structural car mesh is closed: the regression welds equal-position edges
+across the body, canopy/glass and wheels and requires exactly two oppositely
+oriented uses of every edge. It rejects degenerate faces and excludes only
+intentional surface decals, shadow and additive glow rings. Both road and
+transformable variants pass. A separate 16-second turntable checks the body,
+underside and wheel transition visually.
+
+The white launch overlay is removed. Forward speed remains 1,800 units/s through
+the climb and the final cut, with vertical speed 650 units/s and matching height
+at the cut. The final scene rebases the forward coordinate, then the stationary
+camera lets the coupe pass before a linear target tilt reveals the city and
+the existing three-second fade. Camera clearance includes the wider hover pods.
+
+The desktop quality build uses two full 2880×1920 colour buffers plus a depth
+buffer, bilinear perspective textures, and full-detail meshes. All three buffers
+have checked guard regions on every exported frame. It preserves RGB565 and the
+engine's geometry/lighting; downsampling to 1920×1280 supplies spatial AA. Its
+quality-only UV regression checks analytic samples for projected triangles whose
+areas and reciprocal-depth products exceed the compact integer path's limits.
+The new Jet option defaults off, preserving the firmware's arithmetic.
+
+
+The final build passed all eight native tests and all 2,021 optimized/reference
+timeline hashes match. The separate quality UV regression passes. The S3 build
+has no frame-size warning over 2 KiB and completed all eleven cuts and its
+intentional reboot on COM6 with no captured panic or heap corruption. The lowest
+reported internal free heap was about 18 KiB, with a 17 KiB largest block.
+
+The complete quality export decodes as 6,120 frames, 102 seconds, 1920×1280 at
+60 fps. The updated packed-field review also decodes without errors. Neither
+video's playback rate measures hardware speed.
+
+Mean sampled S3 cadence after sealing the car and revising the ending:
+
+| Cut | Previous | Sealed car / fly-by |
+| --- | ---: | ---: |
+| 01 THE RIVER | 51.4 | 51.8 |
+| 02 RAIN DISTRICT | 29.7 | 30.1 |
+| 03 THE COURIER | 52.4 | 45.8 |
+| 04 REAR VIEW | 38.2 | 36.3 |
+| 05 NO DRIVER | 34.6 | 34.3 |
+| 06 EIGHTY EIGHT | 59.6 | 59.8 |
+| 07 BOULEVARD | 48.8 | 44.6 |
+| 08 PURSUIT | 48.6 | 45.1 |
+| 09 FLIGHT MODE | 46.6 | 43.9 |
+| 10 IGNITION | 51.6 | 51.1 |
+| 11 ABOVE IT ALL | 42.0 | 48.0 |
+
+The extra closed car surfaces add geometry cost to its exterior shots.
+Rain and cockpit remain around 30–34 fields/s; the 50 fields/s minimum is still
+unmet. Means come from serial windows that can straddle cuts, not frame minima.
+The native quality path is a separate desktop build, and the new precision UV
+option remains disabled in S3 firmware.

@@ -9,6 +9,11 @@
 #include <cmath>
 namespace Film {
 using namespace Renderer;
+#ifndef FILM_RENDER_SCALE
+#define FILM_RENDER_SCALE 1
+#endif
+inline constexpr int renderScale=FILM_RENDER_SCALE;
+inline constexpr int renderWidth=480*renderScale,renderHeight=320*renderScale;
 inline constexpr float pi=3.14159265359f;
 inline Scene* scene=nullptr;
 inline Camera camera;
@@ -77,5 +82,5 @@ inline Object* batchStaticDetails(size_t first){
  return bank.finish(bank.own(combined));
 }
 inline Object* reflected(Object* source){auto* o=bank.own(new Object(*source));o->invalidatePositions();for(auto& v:o->vertices){v.position.y=-v.position.y;v.normal.y=-v.normal.y;}for(auto& t:o->triangles)std::swap(t.v2,t.v3);o->position.y=-o->position.y;return bank.finish(o,true);}
-inline void billboardGlow(Vector3 position,int size){auto* m=bank.texture(&glowTex);auto* s=bank.sprite(m,0,0,10);s->blendMode=BlendMode::BLEND_ADD;s->textureFlags=Sprite2D::MIRROR_X|Sprite2D::MIRROR_Y;s->scale=size;const auto v=camera.transformDirection(position-camera.position);if(v.z>40){s->x=240+int(v.x*camera.fovFactor/v.z)-16*size;s->y=160-int(v.y*camera.fovFactor/v.z)-16*size;}else s->enabled=false;}
+inline void billboardGlow(Vector3 position,int size){auto* m=bank.texture(&glowTex);auto* s=bank.sprite(m,0,0,10);s->blendMode=BlendMode::BLEND_ADD;s->textureFlags=Sprite2D::MIRROR_X|Sprite2D::MIRROR_Y;s->scale=size*renderScale;const auto v=camera.transformDirection(position-camera.position);if(v.z>40){s->x=renderWidth/2+int(v.x*camera.fovFactor/v.z)-16*size*renderScale;s->y=renderHeight/2-int(v.y*camera.fovFactor/v.z)-16*size*renderScale;}else s->enabled=false;}
 }

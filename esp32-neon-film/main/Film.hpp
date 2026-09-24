@@ -17,14 +17,14 @@ inline float time=0,shotTime=0;
 inline int shot=-1;
 inline bool finished=false;
 inline int heroGlow=-1;
-inline uint16_t sky[320];
+inline uint16_t sky[renderHeight];
 inline Vehicle hero,police[2],traffic[6];
 inline ParticleSystem particles(1.2f);
 inline std::vector<std::pair<Object*,Vector3>> scrolling;
 inline std::vector<Material*> digits,scanner;
 inline std::vector<Object*> dashboardParts;
-inline Material fadeMat(0,uint8_t(255)),flashMat(0xffff,uint8_t(0)),barsMat(0,uint8_t(255));
-inline Sprite2D fade,flash,topBar,bottomBar;
+inline Material fadeMat(0,uint8_t(255)),barsMat(0,uint8_t(255));
+inline Sprite2D fade,topBar,bottomBar;
 inline void digitsBuild(){
  // Seven-segment speed display, actual illuminated dashboard geometry.
  for(int d=0;d<2;++d){int x=-175+d*62,y=151,z=-69;
@@ -90,9 +90,9 @@ inline void load(int which){
 #endif
  shot=which;prepareFarFacades();scene->lodScale=(which>=1&&which<=9)?3200:0;
  // Fixed lenses per cut: wider inside the narrow lane, tighter on the wheel transformation.
- constexpr float lenses[]={62,68,62,74,74,48,62,62,56,64,62};
- camera.setFOV(lenses[which],480);camera.nearPlane=40;camera.farPlane=(which>=1&&which<=9)?9000:15000;
- for(int y=0;y<320;++y)sky[y]=rgb(((10+y*15/320)<<16)|((15+y*22/320)<<8)|(34+y*40/320));
+ constexpr float lenses[]={62,68,62,74,74,48,62,62,56,64,68};
+ camera.setFOV(lenses[which],renderWidth);camera.nearPlane=40;camera.farPlane=(which>=1&&which<=9)?9000:15000;
+ for(int y=0;y<renderHeight;++y)sky[y]=rgb(((10+y*15/renderHeight)<<16)|((15+y*22/renderHeight)<<8)|(34+y*40/renderHeight));
  if(shot==0){skyline();}
  else if(shot==1){street(320,14,true,7);}
  else if(shot==2||shot==3){street(320,16,false);road.capture(11520);hero.build();}
@@ -106,7 +106,7 @@ inline void load(int which){
  }
  else if(shot==7){boulevard(16);road.capture(11520);hero.build();for(int i=0;i<6;++i)traffic[i].build(false,true,false,i);for(auto& c:police)c.build(true,true);}
  else if(shot==8||shot==9){boulevard(16);road.capture(11520);hero.build(false,false,true);for(auto& c:police)c.build(true,true);}
- else{cityGrid();}
+ else{cityGrid();relocate(0,{0,0,-3400},20);hero.build(false,false,true);}
  if(!hero.parts.empty()){heroGlow=int(glows.size());for(int i=0;i<6;++i)glow({0,0,0},i<2?1:2);}
 #if defined(ESP_PLATFORM) && defined(CONFIG_SPIRAM)
  heap_caps_malloc_extmem_enable(CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL);
@@ -128,7 +128,7 @@ inline void pose(float p){
  Vector3 car{0,0,0};float yaw=0;const float t=shotTime;
  float wheelTravel=t*1900;
  if(shot==8){float braking=std::min(6.f,std::max(0.f,t-2));wheelTravel=1800*(std::min(t,2.f)+braking-braking*braking/12);}
- if(shot==9)wheelTravel=1800*5;
+ if(shot>=9)wheelTravel=1800*5;
  wheelPhase=std::fmod(wheelTravel*180/(44*pi),360.f);
  if(shot==0){camera.setPosition(lerp({2300,410,-1900},{-1100,460,-2300},p));camera.lookAt(lerp({-300,700,2400},{600,760,2400},p));}
  if(shot==1){camera.setPosition(lerp({-210,290,-900},{-150,65,-150},p));camera.lookAt(lerp({130,165,900},{170,70,1500},p));weather(t,false);}
@@ -164,19 +164,23 @@ inline void pose(float p){
   weather(t,true,car);
  }
  if(shot==8){road.advance(t*1800);car={0,int(55*clamp((t-2)/6)),0};float h=clamp((t-2)/6);camera.setPosition(lerp({-510,145,-650},{-570,165,-570},p));camera.lookAt(car+Vector3{50,90,20});hero.pose(car,0,h);for(int i=0;i<2;++i)police[i].pose({i?380:-380,0,-1000-i*500},0,0,0,t);}
- if(shot==9){road.advance(0);car={0,110+int(2900*clamp((t-.6f)/4.4f)),int(700*p)};camera.setPosition(lerp({-580,220,-800},{-580,1000,-950},p));camera.lookAt(lerp({-50,180,70},{200,2400,500},p));hero.pose(car,0,1,1);for(int i=0;i<2;++i)police[i].pose({i?380:-380,0,-1000-i*500},0,0,0,.1f);weather(t,true,car);}
- if(shot==10){camera.setPosition(lerp({-3100,4000,-2500},{-1300,5600,-3400},p));camera.lookAt(lerp({900,100,2000},{300,0,2500},p));}
+ // Maintain the street's 1800-unit/s forward speed through the climb.
+ // The tracking rig translates linearly with the car while the city stops.
+ if(shot==9){road.advance(0);car={0,55+int(650*t),int(1800*t)};camera.setPosition({-650,260+int(580*t),1000+int(1800*t)});camera.lookAt(car+Vector3{40,60,0});hero.pose(car,0,1,1);for(int i=0;i<2;++i)police[i].pose({i?380:-380,0,-1000-i*500},0,0,0,.1f);}
+ // A stationary camera is ahead of the flight path. The same velocity carries
+ // the coupe up past the lens; hold on the city after it leaves, then fade.
+ if(shot==10){car={0,3305+int(650*t),-3600+int(1800*t)};camera.setPosition({240,5250,1800});camera.lookAt(lerp({0,3305,-3600},{0,900,-3600},p));hero.pose(car,0,1,1);}
  animateCity(t);
  for(size_t i=0;i<flicker.size();++i){float v=std::fmod(t*11+i*3.7f,13.f);flicker[i]->alpha=uint8_t(v<.45f?70:255);}
- if(water){auto v=camera.transformDirection(Vector3{0,0,1900}-camera.position);int32_t cx,sx,cy,sy,cz,sz;camera.getRotationMatrix(cx,sx,cy,sy,cz,sz);int horizon=160+int(sx*camera.fovFactor/1024.f);float shore=160-v.y*camera.fovFactor/v.z;water->waterYBias=uint8_t(std::clamp(int(2*(shore-horizon)),0,255));water->waterReflectionMaxY=int16_t(shore);scene->waterTime=t;}
+ if(water){auto v=camera.transformDirection(Vector3{0,0,1900}-camera.position);int32_t cx,sx,cy,sy,cz,sz;camera.getRotationMatrix(cx,sx,cy,sy,cz,sz);int horizon=renderHeight/2+int(sx*camera.fovFactor/1024.f);float shore=renderHeight/2-v.y*camera.fovFactor/v.z;water->waterYBias=uint8_t(std::clamp(int(2*(shore-horizon)),0,255));water->waterReflectionMaxY=int16_t(shore);scene->waterTime=t;}
  if(heroGlow>=0){glows[heroGlow].position=hero.position+yawed({-78,57,290},hero.heading);glows[heroGlow+1].position=hero.position+yawed({78,57,290},hero.heading);for(int i=0;i<4;++i)glows[heroGlow+2+i].position=hero.position+yawed({i%2?150:-150,35,i<2?-175:175},hero.heading);}
  projectGlows();
- if(shot==4||shot==5)for(auto& g:glows)g.sprite->enabled=g.sprite->enabled && shot==4 && g.sprite->y<160;
+ if(shot==4||shot==5)for(auto& g:glows)g.sprite->enabled=g.sprite->enabled && shot==4 && g.sprite->y<renderHeight/2;
  if(heroGlow>=0){
   auto facing=yawed({0,0,1024},hero.heading);auto view=camera.position-hero.position;
   bool front=int64_t(facing.x)*view.x+int64_t(facing.z)*view.z>0;
   for(int i=0;i<2;++i)glows[heroGlow+i].sprite->enabled=glows[heroGlow+i].sprite->enabled && front;
-  for(int i=0;i<4;++i){auto* halo=glows[heroGlow+2+i].sprite;halo->enabled=halo->enabled && (shot==9||(shot==8&&t>2));halo->material->alpha=shot==9?220:uint8_t(180*clamp((t-2)/6));}
+  for(int i=0;i<4;++i){auto* halo=glows[heroGlow+2+i].sprite;halo->enabled=halo->enabled && (shot>=9||(shot==8&&t>2));halo->material->alpha=shot>=9?220:uint8_t(180*clamp((t-2)/6));}
  }
 }
 inline void seek(float absolute){
@@ -184,7 +188,7 @@ inline void seek(float absolute){
  if(next!=shot)load(next);
  pose(clamp(shotTime/durations[shot]));
  int alpha=shot==0?int(255*(1-clamp(shotTime/3))):shot==10?int(255*clamp((shotTime-5)/3)):0;
- setSolidRectAlpha(fade,uint8_t(alpha));float burst=shot==9?std::max(0.f,1-std::abs(shotTime-.55f)/.3f):0;setSolidRectAlpha(flash,uint8_t(burst*245));
+ setSolidRectAlpha(fade,uint8_t(alpha));
 
 }
 inline void update(float dt){time+=dt;if(time>=duration+1){finished=true;
@@ -195,24 +199,23 @@ inline void update(float dt){time+=dt;if(time>=duration+1){finished=true;
 #endif
  }seek(time);}
 inline unsigned effects(Scene& target){
- particles.render(&target,&camera,480,320);unsigned count=particles.lastRenderedTriangles;
+ particles.render(&target,&camera,renderWidth,renderHeight);unsigned count=particles.lastRenderedTriangles;
  if(shot!=1)return count;
  // Brief 1/250 s rain exposure: narrow dim streaks, not broad spark wedges.
- auto* raster=target.getRenderer();const bool parity=(target.frameCounter-1)%2==0;
+ auto* raster=target.getRenderer();const bool parity=raster->interlacedMode && (target.frameCounter-1)%2==0;
  Material rain(rgb(0x91B4CC));rain.emissive=true;rain.shadingMode=ShadingMode::UNLIT;rain.alpha=42;
  for(int i=0;i<92;++i){float age=std::fmod(shotTime*4.5f+i*.6180339f,1.f);Vector3 world{(i*193)%570-285,int(1100-age*1200),camera.position.z+200+(i*137)%1700};
   auto a=camera.transformDirection(world-camera.position),b=camera.transformDirection(world+Vector3{1,-22,0}-camera.position);
   if(a.z<=80||b.z<=80)continue;
-  int x=240+int(a.x*camera.fovFactor/a.z),y=160-int(a.y*camera.fovFactor/a.z),tx=240+int(b.x*camera.fovFactor/b.z),ty=160-int(b.y*camera.fovFactor/b.z);
-  RenderVertex v0,v1,v2;v0.position={x,y,a.z};v1.position={x+1,y,a.z};v2.position={tx,ty,b.z};
+  int x=renderWidth/2+int(a.x*camera.fovFactor/a.z),y=renderHeight/2-int(a.y*camera.fovFactor/a.z),tx=renderWidth/2+int(b.x*camera.fovFactor/b.z),ty=renderHeight/2-int(b.y*camera.fovFactor/b.z);
+  RenderVertex v0,v1,v2;v0.position={x,y,a.z};v1.position={x+renderScale,y,a.z};v2.position={tx,ty,b.z};
   if(raster->drawTriangle(v0,v1,v2,&rain,nullptr,nullptr,parity,false,true,0,255))++count;
  }
  return count;
 }
 inline void init(Scene& target){scene=&target;scene->setCamera(&camera);scene->setClearBuffer(true);scene->setDirectionalLight(&key);scene->setAmbientLight(&ambient);scene->backgroundGradientColors=sky;
- fade=makeFullScreenFade(480,320,0,&fadeMat);fade.zOrder=900000;scene->addSprite(&fade);
- flash=makeFullScreenFade(480,320,0xffff,&flashMat);flash.zOrder=900001;scene->addSprite(&flash);
- topBar=makeSolidRect(0,0,480,12,&barsMat);bottomBar=makeSolidRect(0,308,480,12,&barsMat);topBar.zOrder=bottomBar.zOrder=800000;scene->addSprite(&topBar);scene->addSprite(&bottomBar);
+ fade=makeFullScreenFade(renderWidth,renderHeight,0,&fadeMat);fade.zOrder=900000;scene->addSprite(&fade);
+ topBar=makeSolidRect(0,0,renderWidth,12*renderScale,&barsMat);bottomBar=makeSolidRect(0,308*renderScale,renderWidth,12*renderScale,&barsMat);topBar.zOrder=bottomBar.zOrder=800000;scene->addSprite(&topBar);scene->addSprite(&bottomBar);
  seek(0);
 }
 }

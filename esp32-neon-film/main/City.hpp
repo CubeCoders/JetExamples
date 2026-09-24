@@ -12,8 +12,8 @@ inline void animateCity(float t){
  for(auto& b:searchlights){b.mesh->rotation.z=int(19*std::sin(t*.31f+b.phase));b.mesh->rotation.y=int(20*std::sin(t*.19f+b.phase));}
  for(size_t i=0;i<holograms.size();++i){holograms[i]->position.y=1000+int(i)*110+int(24*std::sin(t*.7f+i));}
 }
-inline void glow(Vector3 p,int scale=2){auto* s=bank.sprite(bank.texture(&glowTex),0,0,10);s->blendMode=BlendMode::BLEND_ADD;s->textureFlags=Sprite2D::MIRROR_X|Sprite2D::MIRROR_Y;s->scale=scale;glows.push_back({p,s,scale});}
-inline void projectGlows(){for(auto& g:glows){auto v=camera.transformDirection(g.position-camera.position);auto* s=g.sprite;s->enabled=v.z>80 && v.z<camera.farPlane;if(s->enabled){s->x=240+int(v.x*camera.fovFactor/v.z)-16*g.scale;s->y=160-int(v.y*camera.fovFactor/v.z)-16*g.scale;}}}
+inline void glow(Vector3 p,int scale=2){auto* s=bank.sprite(bank.texture(&glowTex),0,0,10);s->blendMode=BlendMode::BLEND_ADD;s->textureFlags=Sprite2D::MIRROR_X|Sprite2D::MIRROR_Y;s->scale=scale*renderScale;glows.push_back({p,s,scale});}
+inline void projectGlows(){for(auto& g:glows){auto v=camera.transformDirection(g.position-camera.position);auto* s=g.sprite;s->enabled=v.z>80 && v.z<camera.farPlane;if(s->enabled){s->x=renderWidth/2+int(v.x*camera.fovFactor/v.z)-16*g.scale*renderScale;s->y=renderHeight/2-int(v.y*camera.fovFactor/v.z)-16*g.scale*renderScale;}}}
 inline void building(int x,int z,int width,int depth,int height,int style,bool detail=true){
  auto* dark=bank.paint(style%2?0x19243B:0x25213C);
  auto* tower=bank.object();const int bevel=std::min(width,depth)/6;

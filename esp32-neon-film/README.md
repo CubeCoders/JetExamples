@@ -22,12 +22,15 @@ not used or bundled in this project.
 | 64–78 | Staged overtakes, pursuing police and four camera positions | [08](references/cut-08.png) |
 | 78–88 | Wheels slow and hinge downward; cyan hub glow builds | [09](references/cut-09.png) |
 | 88–93 | Flash, rise and frozen city motion | [10](references/cut-10.png) |
-| 93–101 | City overview and fade-out | [11](references/cut-11.png) |
+| 93–101 | Ascending fly-by, city overview and fade-out | [11](references/cut-11.png) |
 
 Camera translation is linear within each tracking shot; the front orbit uses
 constant angular progression. Smooth lane changes describe vehicle steering,
 not camera easing. The wheels provide the entire hover conversion: no wings
-or deployed rear engine. Road sections recycle around the tracking camera. The
+or deployed rear engine. The launch has no flash: the car retains its forward
+speed of 1,800 world units/s while climbing at 650 units/s. The final camera
+waits ahead of its flight path, letting the coupe pass close to the lens before
+tilting down over the city and fading out. Road sections recycle around the tracking camera. The
 framing uses offset subjects and diagonal street lines, with a fixed lens per
 cut rather than a uniform centred composition.
 
@@ -64,6 +67,8 @@ retain their original falloff.
   Persistent immutable textures remain valid for concurrent scanout snapshots.
   Large scene allocations prefer PSRAM; internal RAM is reserved for live
   transforms and runtime work. Adjacent shop details share transform work.
+- Closed hero body, shared canopy/glass boundaries, inner wheel-well walls,
+  a continuous chassis floor and capped wheels that remain sealed in hover mode.
 - Enclosed cockpit with sloping windscreen pillars, roof header, door trim,
   centre console and an unattended yoke; the driver camera stays at road height.
 - Only the rounded FPS number appears at the absolute top-right on hardware.
@@ -105,5 +110,26 @@ directly into ffmpeg and writes no individual frame files. Its 60 fps video
 reconstructs the same alternating packed fields, including previous-field water
 and scanline sprite compositing. It omits the hardware FPS overlay: native
 export speed is not an S3 measurement. Silent video is for visual review.
+
+A separate desktop quality target renders full 2880�1920 RGB565 colour and
+depth buffers at every frame, with bilinear textures, perspective mapping and
+full-detail meshes. The export downsamples to 1920�1280 at 60 fps using Lanczos
+filtering for spatial anti-aliasing. It has no packed fields, scanline
+reconstruction or hardware counters. Geometry, artwork and camera paths are
+shared with the S3 build; it remains an actual Jet render, not a ray-traced remake.
+
+```sh
+cmake -S tests/quality -B build-quality -DCMAKE_BUILD_TYPE=Release
+cmake --build build-quality --config Release
+ctest --test-dir build-quality -C Release --output-on-failure
+python tools/render_video.py quality.mp4 --quality
+```
+
+For multi-configuration generators, also pass `--renderer` with the executable
+under `build-quality/Release`. Both export modes write render and encoding logs
+next to the MP4. The quality build enables Jet's optional
+`JET_HIGH_PRECISION_UVS`: large projected triangles use full-width edge weights
+and double reciprocal depths to prevent texture overflow. The embedded path
+keeps the option disabled and pays no added pixel cost.
 
 See [VALIDATION.md](VALIDATION.md) for checks and known limitations.

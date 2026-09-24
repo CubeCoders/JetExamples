@@ -41,7 +41,7 @@ inline void checkTraffic(float seconds){
 inline void checkVehicleCameras(float seconds){
  using namespace Film;
  auto check=[&](const Vehicle& car){if(car.parts.empty())return;auto local=yawed(camera.position-car.position,-car.heading);
-  if(std::abs(local.x)<165 && std::abs(local.z)<330 && local.y>-25 && local.y<230){std::fprintf(stderr,"Camera clips vehicle at %.2f: local %d %d %d\n",seconds,local.x,local.y,local.z);assert(false);}
+  if(std::abs(local.x)<205 && std::abs(local.z)<330 && local.y>-25 && local.y<230){std::fprintf(stderr,"Camera clips vehicle at %.2f: local %d %d %d\n",seconds,local.x,local.y,local.z);assert(false);}
  };
  check(hero);for(auto& car:traffic)check(car);for(auto& car:police)check(car);
  if(shot==7){assert(!overlapCars(police[0],police[1]));for(auto& cop:police)assert(!overlapCars(hero,cop));}

@@ -15,17 +15,27 @@ struct Vehicle {
   int64_t facing=(int64_t(u.y)*v.z-int64_t(u.z)*v.y)*outward.x+(int64_t(u.z)*v.x-int64_t(u.x)*v.z)*outward.y+(int64_t(u.x)*v.y-int64_t(u.y)*v.x)*outward.z;
   if(facing<0)quad(o,d,c,b,a,m);else quad(o,a,b,c,d,m);
  }
+ void triangle(Object* o,Vector3 a,Vector3 b,Vector3 c,Material* m,Vector3 outward){
+  auto u=b-a,v=c-a;
+  int64_t facing=(int64_t(u.y)*v.z-int64_t(u.z)*v.y)*outward.x+(int64_t(u.z)*v.x-int64_t(u.x)*v.z)*outward.y+(int64_t(u.x)*v.y-int64_t(u.y)*v.x)*outward.z;
+  if(facing<0)std::swap(b,c);
+  int n=int(o->vertices.size());o->addVertex({a});o->addVertex({b});o->addVertex({c});o->addTriangle(n,n+1,n+2,m);
+ }
  void wheel(int side,int z,bool transformable){
   auto* o=bank.object();auto* rubber=bank.paint(0x111724);auto* alloy=bank.paint(0x8EADCA);auto* spoke=bank.paint(0x34475B);
   constexpr int segments=8;
   auto point=[side](float a,int radius,int x){return Vector3{side*x,int(radius*std::cos(a)),int(radius*std::sin(a))};};
-  for(int i=0;i<segments;++i){float a=i*2*pi/segments,b=(i+1)*2*pi/segments;
-   quad(o,point(a,44,-17),point(b,44,-17),point(b,44,17),point(a,44,17),rubber);
-   quad(o,point(a,44,18),point(b,44,18),point(b,35,19),point(a,35,19),rubber);
-   quad(o,point(a,35,20),point(b,35,20),point(b,14,21),point(a,14,21),i%3?alloy:spoke);
-   int n=int(o->vertices.size());o->addVertex({{side*22,0,0}});o->addVertex({point(a,14,22)});o->addVertex({point(b,14,22)});o->addTriangle(n,n+1,n+2,spoke);
+  for(int i=0;i<segments;++i){float a=i*2*pi/segments,b=(i+1)*2*pi/segments,mid=(a+b)*.5f;
+   Vector3 radial{0,int(1024*std::cos(mid)),int(1024*std::sin(mid))};
+   // Every ring shares its boundary with the next: tread, two sidewalls,
+   // outer alloy disc and inner cap form a closed wheel even in flight.
+   face(o,point(a,44,-14),point(b,44,-14),point(b,44,14),point(a,44,14),rubber,radial);
+   face(o,point(a,44,-14),point(a,35,-17),point(b,35,-17),point(b,44,-14),rubber,{-side,0,0});
+   triangle(o,{side*-17,0,0},point(a,35,-17),point(b,35,-17),rubber,{-side,0,0});
+   face(o,point(a,44,14),point(b,44,14),point(b,35,17),point(a,35,17),rubber,{side,0,0});
+   face(o,point(a,35,17),point(b,35,17),point(b,14,19),point(a,14,19),i%3?alloy:spoke,{side,0,0});
+   triangle(o,{side*19,0,0},point(a,14,19),point(b,14,19),spoke,{side,0,0});
   }
-  if(side<0)for(auto& triangle:o->triangles)std::swap(triangle.v1,triangle.v3);
   o->cullingMode=CullingMode::CULL_BACKFACES;bank.finish(o);add(o,{side*122,46,z},side<0?2:3);
   if(transformable){auto* ring=bank.object();for(int i=0;i<segments;++i){float a=i*2*pi/segments,b=(i+1)*2*pi/segments;quad(ring,point(a,30,23),point(b,30,23),point(b,22,23),point(a,22,23),wheelGlow);}bank.finish(ring);add(ring,{side*122,46,z},side<0?2:3);}
  }
@@ -34,37 +44,57 @@ struct Vehicle {
   auto* edge=bank.paint(0x465E85,255,ShadingMode::PHONG);edge->diffuse=175;edge->specular=190;edge->specularExponent=32;
   auto* trim=bank.paint(0x122234);auto* lamps=bank.paint(0xB5F8FF);auto* red=bank.paint(0xFF395D);
   auto* body=bank.object();body->cullingMode=CullingMode::CULL_BACKFACES;
-  const int zs[]={-285,-225,-110,95,205,285},widths[]={108,132,128,124,128,110},ys[]={98,117,111,104,94,66};
-  for(int i=0;i<5;++i){int z=zs[i],n=zs[i+1],a=widths[i],b=widths[i+1],y=ys[i],v=ys[i+1];
-   face(body,{-a+18,y+8,z},{a-18,y+8,z},{b-18,v+8,n},{-b+18,v+8,n},metal,{0,1,0});
-   for(int s:{-1,1})face(body,{s*a,y,z},{s*(a-18),y+8,z},{s*(b-18),v+8,n},{s*b,v,n},edge,{s,1,0});
-  }
-  // Side panels stop at the wheel arches; the tyres are not buried in a box.
-  const int stations[]={-285,-226,-213,-175,-137,-124,-85,85,124,137,175,213,226,285};
-  const int lower[]={38,38,82,109,82,38,32,32,38,80,101,80,38,38};
-  auto section=[&](int z){int i=0;while(i<4&&z>zs[i+1])++i;float q=float(z-zs[i])/(zs[i+1]-zs[i]);return std::pair<int,int>{int(widths[i]+(widths[i+1]-widths[i])*q),int(ys[i]+(ys[i+1]-ys[i])*q)};};
-  for(int s:{-1,1})for(int i=0;i<13;++i){auto a=section(stations[i]),b=section(stations[i+1]);face(body,{s*a.first,lower[i],stations[i]},{s*b.first,lower[i+1],stations[i+1]},{s*b.first,b.second,stations[i+1]},{s*a.first,a.second,stations[i]},metal,{s,0,0});}
-  face(body,{-108,38,-285},{108,38,-285},{108,98,-285},{-108,98,-285},trim,{0,0,-1});
-  face(body,{-110,38,285},{110,38,285},{110,66,285},{-110,66,285},trim,{0,0,1});
-  face(body,{-98,32,-267},{98,32,-267},{100,32,270},{-100,32,270},trim,{0,-1,0});
-  // Canopy pillars and roof define the wedge silhouette, separate glass below.
-  face(body,{-84,157,-92},{84,157,-92},{80,160,30},{-80,160,30},metal,{0,1,0});
-  for(int s:{-1,1}){
-   face(body,{s*111,112,-176},{s*86,157,-96},{s*74,157,-88},{s*96,114,-169},edge,{s,1,-1});
-   face(body,{s*107,112,121},{s*80,160,30},{s*74,160,24},{s*98,112,113},edge,{s,1,1});
-   face(body,{s*123,34,-117},{s*123,34,115},{s*126,42,115},{s*126,42,-117},trim,{s,0,0});
-   // Door shut line, flush handle, and tiny front/rear amber markers.
-   face(body,{s*129,46,-78},{s*129,108,-78},{s*129,108,-75},{s*129,46,-75},trim,{s,0,0});
-   face(body,{s*129,93,-61},{s*129,93,-29},{s*129,97,-29},{s*129,97,-61},trim,{s,0,0});
-   face(body,{s*108,51,286},{s*43,51,286},{s*43,58,286},{s*108,58,286},lamps,{0,0,1});
-  }
-  face(body,{-100,83,-286},{100,83,-286},{100,90,-286},{-100,90,-286},red,{0,0,-1});
+  const int shapeZ[]={-285,-225,-110,95,205,285},shapeW[]={108,132,128,124,128,110},shapeY[]={98,117,111,104,94,66};
+  auto shape=[&](int z){int i=0;while(i<4&&z>shapeZ[i+1])++i;float q=float(z-shapeZ[i])/(shapeZ[i+1]-shapeZ[i]);return std::pair<int,int>{int(shapeW[i]+(shapeW[i+1]-shapeW[i])*q),int(shapeY[i]+(shapeY[i+1]-shapeY[i])*q)};};
+  const int zs[]={-285,-225,-213,-175,-137,-125,125,137,175,213,225,285};
+  const int arches[]={38,38,82,109,82,38,38,80,101,80,38,38};
+  constexpr int sections=sizeof(zs)/sizeof(zs[0]);
+  auto ring=[&](int i,Vector3* p){auto [w,y]=shape(zs[i]);int z=zs[i],lip=std::min(arches[i],y-5);
+   const Vector3 crossSection[]={{-w+18,y+8,z},{w-18,y+8,z},{w,y,z},{w,lip,z},{85,lip,z},{85,26,z},{-85,26,z},{-85,lip,z},{-w,lip,z},{-w,y,z}};
+   std::copy(std::begin(crossSection),std::end(crossSection),p);
+  };
+  // A single closed loft: wheel recesses have ceilings and inner walls,
+  // while a continuous central floor closes the underside of the chassis.
+  const Vector3 outward[]={{0,1,0},{1,1,0},{1,0,0},{0,-1,0},{1,0,0},{0,-1,0},{-1,0,0},{0,-1,0},{-1,0,0},{-1,1,0}};
+  Vector3 a[10],b[10];ring(0,a);
+  for(int i=1;i<sections;++i){ring(i,b);for(int j=0;j<10;++j){auto* mat=j==0?metal:(j==1||j==9)?edge:(j==2||j==8)?metal:trim;face(body,a[j],b[j],b[(j+1)%10],a[(j+1)%10],mat,outward[j]);}std::copy(std::begin(b),std::end(b),a);}
+  for(int end:{0,sections-1}){ring(end,a);Vector3 center{0,65,zs[end]},normal{0,0,end?1:-1};for(int j=0;j<10;++j)triangle(body,center,a[j],a[(j+1)%10],trim,normal);}
   body->computeFlatNormals();bank.finish(body);add(body);
-  auto* glass=bank.texture(&env);auto* windows=bank.object();
-  face(windows,{-98,113,113},{98,113,113},{74,159,29},{-74,159,29},glass,{0,1,1});
-  face(windows,{-99,114,-170},{99,114,-170},{77,156,-91},{-77,156,-91},glass,{0,1,-1});
-  for(int s:{-1,1})face(windows,{s*110,113,-157},{s*106,113,105},{s*77,155,25},{s*82,153,-87},glass,{s,1,0});
+
+  // The canopy is another closed volume. All four glass panels are inset
+  // into frames derived from the SAME corners, so roof, pillars and glass
+  // meet exactly instead of approximating independent silhouettes.
+  auto* canopy=bank.object();canopy->cullingMode=CullingMode::CULL_BACKFACES;
+  auto* windows=bank.object();windows->cullingMode=CullingMode::CULL_BACKFACES;
+  auto* glass=bank.texture(&env);
+  const Vector3 rearL{-98,118,-170},rearR{98,118,-170},frontL{-104,106,121},frontR{104,106,121};
+  const Vector3 roofRearL{-84,157,-92},roofRearR{84,157,-92},roofFrontL{-80,160,30},roofFrontR{80,160,30};
+  auto glazed=[&](Vector3 p0,Vector3 p1,Vector3 p2,Vector3 p3,Vector3 normal){
+   Vector3 outer[]={p0,p1,p2,p3},inner[4];
+   for(int i=0;i<4;++i){auto p=outer[i],u=outer[(i+1)%4]-p,v=outer[(i+3)%4]-p;inner[i]=p+(u+v).divide(12);}
+   for(int i=0;i<4;++i){int j=(i+1)%4;face(canopy,outer[i],outer[j],inner[j],inner[i],edge,normal);}
+   face(windows,inner[0],inner[1],inner[2],inner[3],glass,normal);
+  };
+  glazed(frontL,frontR,roofFrontR,roofFrontL,{0,1,1});
+  glazed(rearR,rearL,roofRearL,roofRearR,{0,1,-1});
+  glazed(rearL,frontL,roofFrontL,roofRearL,{-1,1,0});
+  glazed(frontR,rearR,roofRearR,roofFrontR,{1,1,0});
+  face(canopy,roofRearL,roofRearR,roofFrontR,roofFrontL,metal,{0,1,0});
+  face(canopy,rearL,rearR,frontR,frontL,trim,{0,-1,0});
+  canopy->computeFlatNormals();bank.finish(canopy);add(canopy);
   windows->computeFlatNormals();bank.finish(windows);add(windows,{},1);
+
+  // Intentional surface decals are separate from the closed structural mesh.
+  auto* details=bank.object();details->cullingMode=CullingMode::CULL_BACKFACES;
+  for(int s:{-1,1}){
+   auto sideAt=[&](int z,int y){return Vector3{s*(shape(z).first+1),y,z};};
+   face(details,sideAt(-117,38),sideAt(115,38),sideAt(115,44),sideAt(-117,44),trim,{s,0,0});
+   face(details,sideAt(-78,46),sideAt(-78,108),sideAt(-75,108),sideAt(-75,46),trim,{s,0,0});
+   face(details,sideAt(-61,93),sideAt(-29,93),sideAt(-29,97),sideAt(-61,97),trim,{s,0,0});
+   face(details,{s*108,51,286},{s*43,51,286},{s*43,58,286},{s*108,58,286},lamps,{0,0,1});
+  }
+  face(details,{-100,83,-286},{100,83,-286},{100,90,-286},{-100,90,-286},red,{0,0,-1});
+  bank.finish(details);add(details,{},12);
   for(int s:{-1,1})for(int z:{-175,175})wheel(s,z,transformable);
  }
  void trafficBody(bool police,int style){
