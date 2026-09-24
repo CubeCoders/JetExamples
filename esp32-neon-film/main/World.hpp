@@ -26,7 +26,7 @@ inline uint16_t rgb(unsigned c){int r=contrastChannel((c>>16)&255),g=contrastCha
 inline float clamp(float t){return std::clamp(t,0.f,1.f);}
 inline Vector3 lerp(Vector3 a,Vector3 b,float t){return {int(a.x+(b.x-a.x)*t),int(a.y+(b.y-a.y)*t),int(a.z+(b.z-a.z)*t)};}
 inline Vector3 yawed(Vector3 p,float a){a*=pi/180;return {int(p.x*std::cos(a)+p.z*std::sin(a)),p.y,int(-p.x*std::sin(a)+p.z*std::cos(a))};}
-inline Texture facades[]={Texture(64,128,const_cast<uint16_t*>(Assets::facade0)),Texture(64,128,const_cast<uint16_t*>(Assets::facade1)),Texture(64,128,const_cast<uint16_t*>(Assets::facade2)),Texture(64,128,const_cast<uint16_t*>(Assets::facade3))};
+inline Texture facades[]={Texture(64,128,reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(Assets::facade0)),false,0,false,WRAP,Assets::facade0Palette),Texture(64,128,reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(Assets::facade1)),false,0,false,WRAP,Assets::facade1Palette),Texture(64,128,reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(Assets::facade2)),false,0,false,WRAP,Assets::facade2Palette),Texture(64,128,reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(Assets::facade3)),false,0,false,WRAP,Assets::facade3Palette)};
 // Small filtered facade mipmaps live in internal BSS (8 KiB on ESP32).
 // Fill once before rendering, then treat them as immutable like the flash art.
 alignas(4) inline uint16_t farFacadePixels[4][32*32];
@@ -35,13 +35,13 @@ inline void prepareFarFacades(){
  static bool ready=false;if(ready)return;ready=true;
  for(int k=0;k<4;++k)for(int y=0;y<32;++y)for(int x=0;x<32;++x){
   int r=0,g=0,b=0;
-  for(int dy=0;dy<4;++dy)for(int dx=0;dx<2;++dx){uint16_t c=facades[k].data[(y*4+dy)*64+x*2+dx];r+=(c>>11)&31;g+=(c>>5)&63;b+=c&31;}
+  for(int dy=0;dy<4;++dy)for(int dx=0;dx<2;++dx){uint16_t c=facades[k].palette[reinterpret_cast<const uint8_t*>(facades[k].data)[(y*4+dy)*64+x*2+dx]];r+=(c>>11)&31;g+=(c>>5)&63;b+=c&31;}
   farFacadePixels[k][y*32+x]=uint16_t((r/8)<<11|(g/8)<<5|b/8);
  }
 }
-inline Texture signs[]={Texture(128,64,const_cast<uint16_t*>(Assets::sign0)),Texture(128,64,const_cast<uint16_t*>(Assets::sign1)),Texture(128,64,const_cast<uint16_t*>(Assets::sign2)),Texture(128,64,const_cast<uint16_t*>(Assets::sign3)),Texture(128,64,const_cast<uint16_t*>(Assets::sign4)),Texture(128,64,const_cast<uint16_t*>(Assets::sign5))};
-inline Texture shops[]={Texture(128,64,const_cast<uint16_t*>(Assets::shop0)),Texture(128,64,const_cast<uint16_t*>(Assets::shop1)),Texture(128,64,const_cast<uint16_t*>(Assets::shop2)),Texture(128,64,const_cast<uint16_t*>(Assets::shop3))};
-inline Texture env(128,64,const_cast<uint16_t*>(Assets::environment)),holoTex(64,96,const_cast<uint16_t*>(Assets::hologram),true,0),dashTex(256,128,const_cast<uint16_t*>(Assets::dashboard));
+inline Texture signs[]={Texture(128,64,reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(Assets::sign0)),false,0,false,WRAP,Assets::sign0Palette),Texture(128,64,reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(Assets::sign1)),false,0,false,WRAP,Assets::sign1Palette),Texture(128,64,reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(Assets::sign2)),false,0,false,WRAP,Assets::sign2Palette),Texture(128,64,reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(Assets::sign3)),false,0,false,WRAP,Assets::sign3Palette),Texture(128,64,reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(Assets::sign4)),false,0,false,WRAP,Assets::sign4Palette),Texture(128,64,reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(Assets::sign5)),false,0,false,WRAP,Assets::sign5Palette)};
+inline Texture shops[]={Texture(128,64,reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(Assets::shop0)),false,0,false,WRAP,Assets::shop0Palette),Texture(128,64,reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(Assets::shop1)),false,0,false,WRAP,Assets::shop1Palette),Texture(128,64,reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(Assets::shop2)),false,0,false,WRAP,Assets::shop2Palette),Texture(128,64,reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(Assets::shop3)),false,0,false,WRAP,Assets::shop3Palette)};
+inline Texture env(128,64,reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(Assets::environment)),false,0,false,WRAP,Assets::environmentPalette),holoTex(64,96,reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(Assets::hologram)),true,0,false,WRAP,Assets::hologramPalette),dashTex(256,128,reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(Assets::dashboard)),false,0,false,WRAP,Assets::dashboardPalette);
 inline Texture glowTex(16,16,const_cast<uint16_t*>(Assets::glow),true,0);
 // Texture data is immutable after setup: flash art plus the small DRAM mip cache.
 // Scene-local meshes/materials

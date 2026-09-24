@@ -12,9 +12,24 @@ def contrast_channel(c):return max(0,min(255,(c*5-80+2)//4))
 def grade(c):return tuple(contrast_channel(v) for v in c)
 def save_art(im,path):im.point([contrast_channel(v) for v in range(256)]*3).save(path)
 
+def indexed_array(name,vals,internal=False):
+ # Index the final RGB565 colours, preserving their exact first-seen order.
+ palette=list(dict.fromkeys(vals))
+ assert len(palette)<=256, f'{name}: {len(palette)} colours exceed indexed8'
+ lookup={colour:i for i,colour in enumerate(palette)}
+ indices=[lookup[colour] for colour in vals]
+ assert [palette[i] for i in indices]==vals, name
+ qualifier='' if internal else 'const '
+ return (f'alignas(16) inline {qualifier}uint8_t {name}[]={{\n'
+         +'\n'.join(','.join(map(str,indices[i:i+32]))+',' for i in range(0,len(indices),32))
+         +'\n};\n'
+         +'// Small mutable-in-type palette is placed in internal initialized RAM.\n'
+         +f'alignas(16) inline uint16_t {name}Palette[]={{'+','.join(map(str,palette))+'};\n')
+
 def array(name,im):
  # Preserve the feathered additive halo; grade all opaque/emissive artwork.
  vals=[rgb(c if name=='glow' else grade(c)) for c in im.get_flattened_data()]
+ if name!='glow':return indexed_array(name,vals)
  return f'inline const uint16_t {name}[]={{\n'+'\n'.join(','.join(map(str,vals[i:i+24]))+',' for i in range(0,len(vals),24))+'\n};\n'
 s='#pragma once\n#include <cstdint>\nnamespace Assets {\n';rng=random.Random(2387)
 for k in range(4):

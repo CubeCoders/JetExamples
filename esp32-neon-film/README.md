@@ -109,6 +109,31 @@ the built-in image generation tool; the exact prompts are in
 [references/prompts.json](references/prompts.json). The small firmware artwork
 is generated with Pillow; rebuilding does not need image generation services.
 
+## Lossless indexed textures
+
+The 17 static 3D textures use byte indices into small RGB565 palettes in internal
+RAM. Their source artwork retains every original RGB565 colour and resolution;
+indices remain in flash. The four filtered facade mipmaps stay RGB565 in 8 KiB
+of DRAM. Glow sprites, credits and the dynamic speed display also remain RGB565.
+
+On the reference S3 and 80 MHz ST7796 display, repeated 36-view comparisons
+reduced mean render time from **23.550 to 21.578 ms (8.37%)** on top of the earlier
+engine optimisations. A control using identical renderer code confirmed **8.55%**
+less render time and **12.48%** less raster time, with identical field hashes and
+triangle counts. These are fixed-view timings, not moving-film average FPS.
+
+Texture storage falls from 323,584 to 164,448 bytes including palettes. Linked
+benchmark firmware is 155,864 bytes smaller, at a cost of 5,800 bytes of static
+internal memory: 2,984 bytes of IRAM instructions and 2,816 bytes of palette data
+including alignment. This saves flash/cache footprint rather than PSRAM.
+See Jet's [measurement and compatibility notes](https://github.com/CubeCoders/Jet/blob/main/docs/ESP32Performance.md).
+
+The generator grades and converts to RGB565 before indexing, checks the
+256-colour limit and verifies a lossless round trip. Indexed artwork is sampled
+with nearest filtering, including in desktop-quality builds; Sprite2D requires
+RGB565 textures. Normal builds use the checked-in arrays and do not regenerate
+the font-dependent artwork.
+
 ## Build and review
 
 Initialize the shared submodules from the repository root, then use an ESP-IDF
@@ -141,8 +166,9 @@ and scanline sprite compositing. It omits the hardware FPS overlay: native
 export speed is not an S3 measurement. Silent video is for visual review.
 
 A separate desktop quality target renders full 2880×1920 RGB565 colour and
-depth buffers at every frame, with bilinear textures, perspective mapping and
-full-detail meshes. The export downsamples to 1920×1280 at 60 fps using Lanczos
+depth buffers at every frame, with perspective mapping and full-detail meshes.
+RGB565 textures can use bilinear filtering; the lossless indexed artwork remains
+nearest-sampled. The export downsamples to 1920×1280 at 60 fps using Lanczos
 filtering for spatial anti-aliasing. It has no packed fields, scanline
 reconstruction or hardware counters. Geometry, artwork and camera paths are
 shared with the S3 build; it remains an actual Jet render, not a ray-traced remake.
